@@ -1,0 +1,112 @@
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
+import './globals.css';
+import { SanityLive } from '@/sanity/lib/live';
+import { draftMode } from 'next/headers';
+import { StudioRouteGate, VisualEditingGate } from '@/components/sanity-live-wrapper';
+import { Toaster } from '@/components/ui/sonner';
+import { getSiteSettings } from '@/sanity/helpers/settings';
+
+const satoshi = localFont({
+	src: [
+		{
+			path: './fonts/Satoshi-Regular.woff2',
+			weight: '400',
+			style: 'normal',
+		},
+		{
+			path: './fonts/Satoshi-Regular.woff',
+			weight: '400',
+			style: 'normal',
+		},
+		{
+			path: './fonts/Satoshi-Medium.woff2',
+			weight: '500',
+			style: 'normal',
+		},
+		{
+			path: './fonts/Satoshi-Medium.woff',
+			weight: '500',
+			style: 'normal',
+		},
+		{
+			path: './fonts/Satoshi-Bold.woff2',
+			weight: '700',
+			style: 'normal',
+		},
+		{
+			path: './fonts/Satoshi-Bold.woff',
+			weight: '700',
+			style: 'normal',
+		},
+	],
+	variable: '--font-satoshi',
+	display: 'swap',
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+	const settings = await getSiteSettings({ cache: true });
+	const seo = settings?.seo;
+	const siteName = settings?.title ?? 'Page Authority Pro';
+
+	return {
+		metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pageauthoritypro.com'),
+		title: {
+			default: seo?.metaTitle ?? `${siteName} — Attorney SEO & Google Ads for Law Firms`,
+			template: `%s | ${siteName}`,
+		},
+		...(seo?.metaDescription && { description: seo.metaDescription }),
+		openGraph: {
+			type: 'website',
+			locale: 'en_US',
+			siteName,
+			...(seo?.ogImageUrl && { images: [seo.ogImageUrl] }),
+		},
+		twitter: {
+			card: (seo?.twitterCard ?? 'summary_large_image') as 'summary' | 'summary_large_image' | 'app' | 'player',
+			...(seo?.twitterHandle && { site: seo.twitterHandle }),
+		},
+		robots: { index: true, follow: true },
+		...(settings?.faviconUrl && {
+			icons: {
+				icon: settings.faviconUrl,
+				shortcut: settings.faviconUrl,
+				apple: settings.faviconUrl,
+			},
+		}),
+	};
+}
+
+export default async function RootLayout({
+	children,
+}: Readonly<{
+	children: React.ReactNode;
+}>) {
+	const { isEnabled: isDraftMode } = await draftMode();
+
+	return (
+		<html lang='en' className={`${satoshi.variable} h-full antialiased`}>
+			<head />
+			<body className='min-h-full flex flex-col'>
+				{children}
+				<Toaster
+					position='bottom-right'
+					toastOptions={{
+						style: {
+							background: '#08101C',
+							border: '1px solid rgba(199,147,61,0.25)',
+							color: '#F5F5F5',
+							fontFamily: 'var(--font-satoshi)',
+						},
+					}}
+				/>
+				<StudioRouteGate>
+					{/* SanityLive handles real-time updates when draft mode or Presentation Tool is active */}
+					<SanityLive />
+					{/* VisualEditingGate renders click-to-edit overlays only inside the Presentation Tool's iframe */}
+					{isDraftMode && <VisualEditingGate />}
+				</StudioRouteGate>
+			</body>
+		</html>
+	);
+}

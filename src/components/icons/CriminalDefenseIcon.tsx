@@ -1,0 +1,15 @@
+import type { SVGProps } from 'react';
+
+export default function CriminalDefenseIcon(props: SVGProps<SVGSVGElement>) {
+	return (
+		<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
+			<path
+				d='M10.0007 18.3337C10.0007 18.3337 16.6673 15.0003 16.6673 10.0003V4.16699L10.0007 1.66699L3.33398 4.16699V10.0003C3.33398 15.0003 10.0007 18.3337 10.0007 18.3337Z'
+				stroke='#C7933D'
+				strokeWidth='1.25'
+				strokeLinecap='round'
+				strokeLinejoin='round'
+			/>
+		</svg>
+	);
+}
