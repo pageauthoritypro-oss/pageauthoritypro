@@ -19,7 +19,7 @@ function ServiceCard({ plan }: { plan: CampaignPlan }) {
 	const hasPricingBlock = !!plan.pricingBlock?.title;
 
 	return (
-		<article className='flex flex-col gap-8 rounded-2xl p-8 bg-[rgba(15,31,56,0.2)]'>
+		<article className='flex h-full flex-col gap-8 rounded-2xl p-8 bg-[rgba(15,31,56,0.2)]'>
 			<div className='flex items-start gap-6'>
 				<div className='flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle,#241A0A,#060D15)] border-[1.5px] border-[#C7933D]'>
 					<span className='font-heading font-bold text-[32px] leading-[125%] tracking-[-1.3px] text-[#C7933D]'>{plan.badgeNumber}</span>

@@ -16,7 +16,6 @@ interface Props {
 }
 
 export default function AuthorCard({ author, title, showViewAllLink, bottomText }: Props) {
-	const resolvedTitle = title ?? 'About Author';
 	const resolvedShowViewAllLink = showViewAllLink ?? true;
 
 	const initials = author.name
@@ -29,9 +28,11 @@ export default function AuthorCard({ author, title, showViewAllLink, bottomText 
 	return (
 		<div className='rounded-xl bg-[#0F1F38]/20 p-6 flex flex-col gap-5 border border-white/5'>
 			<div className='flex items-center justify-between'>
-				<span className='font-heading font-bold text-[16px] leading-[20px] text-[#C7933D]'>
-					{resolvedTitle}
-				</span>
+				{title && (
+					<span className='font-heading font-bold text-[16px] leading-[20px] text-[#C7933D]'>
+						{title}
+					</span>
+				)}
 				{resolvedShowViewAllLink && (
 					<Link
 						href='/blogs'

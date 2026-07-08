@@ -1,12 +1,15 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { ReactNode } from 'react';
+import { ReactNode, createContext } from 'react';
+
+export const LcpContext = createContext<boolean>(false);
 
 interface AnimatedSectionProps {
 	children: ReactNode;
 	className?: string;
 	isHero?: boolean;
+	isLcp?: boolean;
 	delay?: number;
 }
 
@@ -14,26 +17,25 @@ export default function AnimatedSection({
 	children,
 	className,
 	isHero = false,
+	isLcp = false,
 	delay = 0,
 }: AnimatedSectionProps) {
-	if (isHero) {
-		return (
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{
-					duration: 0.8,
-					delay,
-					ease: [0.215, 0.61, 0.355, 1], // Cubic-bezier for smooth deceleration
-				}}
-				className={className}
-			>
-				{children}
-			</motion.div>
-		);
-	}
+	const shouldAnimateOnMount = isHero || isLcp;
 
-	return (
+	const content = shouldAnimateOnMount ? (
+		<motion.div
+			initial={isLcp ? { y: 20 } : { opacity: 0, y: 20 }}
+			animate={isLcp ? { y: 0 } : { opacity: 1, y: 0 }}
+			transition={{
+				duration: 0.8,
+				delay,
+				ease: [0.215, 0.61, 0.355, 1],
+			}}
+			className={className}
+		>
+			{children}
+		</motion.div>
+	) : (
 		<motion.div
 			initial={{ opacity: 0, y: 30 }}
 			whileInView={{ opacity: 1, y: 0 }}
@@ -47,5 +49,11 @@ export default function AnimatedSection({
 		>
 			{children}
 		</motion.div>
+	);
+
+	return (
+		<LcpContext.Provider value={isLcp}>
+			{content}
+		</LcpContext.Provider>
 	);
 }

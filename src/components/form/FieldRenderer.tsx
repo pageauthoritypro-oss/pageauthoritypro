@@ -1,6 +1,7 @@
 import type { FieldPath } from 'react-hook-form';
 import TextField from './TextField';
 import TextareaField from './TextareaField';
+import PhoneField from './PhoneField';
 import type { ContactFormValues, FormFieldConfig } from './types';
 
 interface FieldRendererProps {
@@ -14,12 +15,9 @@ export default function FieldRenderer({ field }: FieldRendererProps) {
 		return <TextareaField name={name} label={field.label} placeholder={field.placeholder} rows={field.rows} minWords={field.minWords} />;
 	}
 
-	return (
-		<TextField
-			name={name}
-			label={field.label}
-			type={field.type === 'email' || field.type === 'tel' ? field.type : 'text'}
-			placeholder={field.placeholder}
-		/>
-	);
+	if (field.type === 'tel') {
+		return <PhoneField name={name} label={field.label} placeholder={field.placeholder} />;
+	}
+
+	return <TextField name={name} label={field.label} type={field.type === 'email' ? 'email' : 'text'} placeholder={field.placeholder} />;
 }

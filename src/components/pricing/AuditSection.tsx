@@ -80,7 +80,7 @@ export default function AuditSection({ eyebrow, heading, headingTag, description
 
 				{cta?.url && cta?.cta_text && (
 					<AnimatedFadeUp>
-						<CtaLink href={cta.url} variant='primary' target={cta.target} className='flex items-center gap-2'>
+						<CtaLink href={cta.url} variant='primary' target={cta.target} className='flex items-center'>
 						<span>{cta.cta_text}</span>
 						{cta.icon && <DynamicIcon icon={cta.icon} size={16} />}
 						</CtaLink>

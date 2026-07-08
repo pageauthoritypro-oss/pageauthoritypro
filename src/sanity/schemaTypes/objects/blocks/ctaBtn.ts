@@ -1,6 +1,7 @@
 import { defineType, defineField } from "sanity";
 import { LinkIcon } from "@sanity/icons";
 import { buttonVariants } from "../../constants";
+import { linkFields } from "../link";
 
 export const ctaBtn = defineType({
   name: "ctaBtn",
@@ -14,49 +15,7 @@ export const ctaBtn = defineType({
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: "linkType",
-      title: "Link Type",
-      type: "string",
-      options: {
-        list: [
-          { title: "Internal Page", value: "internal" },
-          { title: "External URL", value: "external" },
-        ],
-        layout: "radio",
-      },
-      initialValue: "external",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "internalPage",
-      title: "Internal Page Reference",
-      type: "reference",
-      to: [{ type: "pages" }],
-      hidden: ({ parent }) => parent?.linkType !== "internal",
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const parent = context.parent as { linkType?: string } | undefined;
-          if (parent?.linkType === "internal" && !value) {
-            return "Internal Page Reference is required";
-          }
-          return true;
-        }),
-    }),
-    defineField({
-      name: "url",
-      title: "External URL",
-      type: "string",
-      hidden: ({ parent }) => parent?.linkType !== "external",
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const parent = context.parent as { linkType?: string } | undefined;
-          if (parent?.linkType === "external" && !value) {
-            return "External URL is required";
-          }
-          return true;
-        }),
-    }),
+    ...linkFields,
     defineField({
       name: "variant",
       title: "Variant",

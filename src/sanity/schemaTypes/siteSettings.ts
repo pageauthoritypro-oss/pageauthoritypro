@@ -12,7 +12,7 @@ export const globalConfiguration = defineType({
     { name: "footer", title: "Footer" },
     { name: "seo", title: "SEO" },
     { name: "social", title: "Social Media" },
-    { name: "contact", title: "Contact" },
+    // { name: "contact", title: "Contact" },
     { name: "analytics", title: "Analytics" },
     { name: "scripts", title: "Scripts" },
     { name: "maintenance", title: "Maintenance" },
@@ -170,26 +170,26 @@ export const globalConfiguration = defineType({
     }),
 
     // --- Contact Group ---
-    defineField({
-      name: "email",
-      title: "Contact Email",
-      type: "string",
-      group: "contact",
-      validation: (Rule) => Rule.email(),
-    }),
-    defineField({
-      name: "phone",
-      title: "Phone Number",
-      type: "string",
-      group: "contact",
-    }),
-    defineField({
-      name: "address",
-      title: "Address",
-      type: "text",
-      rows: 2,
-      group: "contact",
-    }),
+    // defineField({
+    //   name: "email",
+    //   title: "Contact Email",
+    //   type: "string",
+    //   group: "contact",
+    //   validation: (Rule) => Rule.email(),
+    // }),
+    // defineField({
+    //   name: "phone",
+    //   title: "Phone Number",
+    //   type: "string",
+    //   group: "contact",
+    // }),
+    // defineField({
+    //   name: "address",
+    //   title: "Address",
+    //   type: "text",
+    //   rows: 2,
+    //   group: "contact",
+    // }),
 
     // --- Analytics Group ---
     defineField({
@@ -206,12 +206,12 @@ export const globalConfiguration = defineType({
       description: "Format: GTM-XXXXXXX",
       group: "analytics",
     }),
-    defineField({
-      name: "facebookPixelId",
-      title: "Facebook Pixel ID",
-      type: "string",
-      group: "analytics",
-    }),
+    // defineField({
+    //   name: "facebookPixelId",
+    //   title: "Facebook Pixel ID",
+    //   type: "string",
+    //   group: "analytics",
+    // }),
 
     // --- Scripts Group ---
     defineField({

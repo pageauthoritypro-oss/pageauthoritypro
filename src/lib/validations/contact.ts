@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'libphonenumber-js/min';
 
 export const MESSAGE_MIN_WORDS = 5;
 
@@ -10,7 +11,11 @@ function countWords(value: string) {
 export const contactFormSchema = z.object({
 	fullName: z.string().trim().min(2, 'Please enter your full name'),
 	email: z.string().trim().email('Please enter a valid email address'),
-	phone: z.string().trim().min(7, 'Please enter a valid phone number'),
+	phone: z
+		.string()
+		.trim()
+		.min(1, 'Please enter your phone number')
+		.refine((value) => isValidPhoneNumber(value), 'Please enter a valid phone number for the selected country'),
 	message: z
 		.string()
 		.trim()

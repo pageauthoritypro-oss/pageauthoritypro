@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { linkFields } from "./link";
 
 export const navigationItem = defineType({
   name: "navigationItem",
@@ -11,12 +12,7 @@ export const navigationItem = defineType({
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: "url",
-      title: "URL",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
+    ...linkFields,
     defineField({
       name: "openInNewTab",
       title: "Open in New Tab",
@@ -30,17 +26,14 @@ export const navigationItem = defineType({
       of: [
         {
           type: "object",
+          name: "navigationChild",
           fields: [
             {
               name: "label",
               type: "string",
               validation: (Rule) => Rule.required(),
             },
-            {
-              name: "url",
-              type: "string",
-              validation: (Rule) => Rule.required(),
-            },
+            ...linkFields,
             { name: "openInNewTab", type: "boolean", initialValue: false },
             {
               name: "logo",
@@ -55,7 +48,16 @@ export const navigationItem = defineType({
   preview: {
     select: {
       title: "label",
-      subtitle: "url",
+      linkType: "linkType",
+      url: "url",
+      internalPageTitle: "internalPage.title",
+    },
+    prepare({ title, linkType, url, internalPageTitle }) {
+      const dest = linkType === "internal" ? `Page: ${internalPageTitle || "Selected Reference"}` : `URL: ${url || ""}`;
+      return {
+        title: title || "Navigation Item",
+        subtitle: dest,
+      };
     },
   },
 });

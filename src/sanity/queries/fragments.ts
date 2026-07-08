@@ -7,6 +7,14 @@ export const CTA_BTN_FIELDS = `
   "icon": icon { "url": asset->url, alt, iconSvg }
 `;
 
+export const LINK_FIELDS = `
+  label,
+  linkType,
+  "url": select(linkType == "internal" => "/" + internalPage->slug.current, url),
+  target,
+  openInNewTab
+`;
+
 export const SEO_FIELDS = `
   metaTitle,
   metaDescription,

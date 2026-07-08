@@ -112,15 +112,16 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	height: 2.875rem;
 	border-radius: 9999px;
 	padding-block: 0.75rem;
 	padding-inline: 1rem;
 	font-family: var(--font-heading);
 	font-size: 1rem;
 	line-height: 1;
-	font-weight: 700;
+	font-weight: 500;
 	color: #020e1c;
-	border: 1.2px solid transparent;
+	border: 1.5px solid transparent;
 	background:
 		linear-gradient(#cd9e51, #c7933d) padding-box,
 		linear-gradient(to bottom, #ae7f32, #7f5d25) border-box;
@@ -143,6 +144,7 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	height: 2.875rem;
 	border-radius: 9999px;
 	padding-block: 0.75rem;
 	padding-inline: 1rem;

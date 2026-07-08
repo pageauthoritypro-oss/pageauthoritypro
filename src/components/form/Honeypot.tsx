@@ -7,7 +7,7 @@ export default function Honeypot() {
 	const { register } = useFormContext<ContactFormValues>();
 
 	return (
-		<div aria-hidden='true' className='absolute left-[-9999px] top-auto h-px w-px overflow-hidden'>
+		<div aria-hidden='true' className='hidden'>
 			<input
 				id='hp_check'
 				type='text'

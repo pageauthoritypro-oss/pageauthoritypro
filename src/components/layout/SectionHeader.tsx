@@ -84,13 +84,12 @@ export default function SectionHeader({
 							? 'items-center justify-center'
 							: cn(
 									'lg:w-[36%] lg:items-end',
-									ctaPosition === 'top' && 'lg:items-top',
+									ctaPosition === 'top' && 'lg:items-start',
 									ctaPosition === 'center' && 'lg:items-center',
-									ctaPosition === 'bottom' && 'lg:items-bottom',
+									ctaPosition === 'bottom' && 'lg:items-end',
 									!ctaPosition && 'lg:items-end',
 								),
-					)}
-				>
+					)}>
 					{ctaBtns.map((btn, index) => (
 						<CtaLink key={index} href={btn.url} variant={btn.variant} target={btn.target}>
 							<span>{btn.cta_text}</span>

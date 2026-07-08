@@ -34,12 +34,7 @@ export default function NotFoundSection(props: NotFoundSectionData) {
 					<AnimatedFadeUp delay={0.25}>
 						<div className='flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto'>
 							{ctaButtons.map((btn, i) => (
-								<CtaLink
-									key={i}
-									href={btn.url ?? '/'}
-									variant={btn.variant ?? 'primary'}
-									target={btn.target}
-									className='rounded-full font-bold font-satoshi text-[16px] px-8 py-3.5 min-w-[160px] text-center justify-center'>
+								<CtaLink key={i} href={btn.url ?? '/'} variant={btn.variant ?? 'primary'} target={btn.target}>
 									{btn.cta_text}
 								</CtaLink>
 							))}

@@ -15,7 +15,7 @@ export default function VsComparisonCard({ column }: VsComparisonCardProps) {
 	return (
 		<div
 			className={cn(
-				'relative w-full lg:shrink-0 rounded-xl p-8 pb-20 flex-1 flex flex-col items-center gap-8 md:gap-12',
+				'relative w-full min-[1280px]:w-[584px] min-[1280px]:shrink-0 rounded-xl p-8 pb-20 flex flex-col items-center gap-8 md:gap-12',
 				isBrand ? 'shadow-[inset_0_0_146.5px_-91px_#C7933D] card-gold-gradient-border' : 'bg-[#0f1f38]/20 border-[5px] border-[#555555]',
 			)}>
 			<div className='flex flex-col items-center justify-center gap-4 sm:gap-6 w-full'>
@@ -30,7 +30,7 @@ export default function VsComparisonCard({ column }: VsComparisonCardProps) {
 				</h3>
 			</div>
 
-			<ul className='w-auto mx-auto flex flex-col justify-center gap-3'>
+			<ul className='w-full mx-auto flex flex-col justify-center gap-3'>
 				{column.items?.map((feature, idx) => {
 					if (!feature || !feature.name) return null;
 					return (

@@ -3,13 +3,30 @@ import type { AdvancedSeoSettings, Page } from "@/sanity/types/advanced";
 import type { Metadata } from "next";
 
 /**
+ * Strips a trailing "| Site Name" suffix from a title, if present.
+ * The root layout's title template already appends "| Site Name", so a
+ * CMS-authored meta title that also includes it would otherwise render twice
+ * (e.g. "Blog | Page Authority Pro | Page Authority Pro").
+ */
+function stripSiteNameSuffix(title: string, siteName: string): string {
+  const suffix = `| ${siteName}`;
+  const trimmed = title.trim();
+  if (trimmed.toLowerCase().endsWith(suffix.toLowerCase())) {
+    return trimmed.slice(0, -suffix.length).trim();
+  }
+  return trimmed;
+}
+
+/**
  * Generate Next.js metadata from advanced SEO settings
  */
 export function generateMetadata(
   seo?: AdvancedSeoSettings,
   siteSeo?: AdvancedSeoSettings,
+  siteName = "Page Authority Pro",
 ): Metadata {
-  const title = seo?.metaTitle || siteSeo?.metaTitle;
+  const rawTitle = seo?.metaTitle || siteSeo?.metaTitle;
+  const title = rawTitle ? stripSiteNameSuffix(rawTitle, siteName) : rawTitle;
   const description = seo?.metaDescription || siteSeo?.metaDescription;
   const ogTitle = seo?.ogTitle || title || siteSeo?.ogTitle;
   const ogDescription = seo?.ogDescription || description || siteSeo?.ogDescription;

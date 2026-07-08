@@ -14,6 +14,7 @@ interface DynamicHeadingProps {
 	align?: 'left' | 'center';
 	defaultTag?: ValidTag;
 	isHero?: boolean;
+	isLcp?: boolean;
 	delay?: number;
 	animate?: boolean;
 }
@@ -38,6 +39,7 @@ export default function DynamicHeading({
 	align = 'left',
 	defaultTag = 'p',
 	isHero,
+	isLcp,
 	delay,
 	animate = true,
 }: DynamicHeadingProps) {
@@ -97,7 +99,7 @@ export default function DynamicHeading({
 	}
 
 	return (
-		<AnimatedFadeUp isHero={isHero} delay={delay}>
+		<AnimatedFadeUp isHero={isHero} delay={delay} isLcp={isLcp}>
 			{headingContent}
 		</AnimatedFadeUp>
 	);
