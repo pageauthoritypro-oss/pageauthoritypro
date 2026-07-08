@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity'
-import { CTA_BTN_FIELDS, SEO_FIELDS } from './fragments'
+import { CTA_BTN_FIELDS, SEO_FIELDS, LINK_FIELDS } from './fragments'
 
 /**
  * GROQ query to fetch all site settings (singleton)
@@ -15,22 +15,15 @@ export const SITE_SETTINGS_QUERY = groq`
     "headerLogoUrl": headerLogo.asset->url,
     "headerLogoSvg": headerLogo.iconSvg,
     "faviconUrl": favicon.asset->url,
-    email,
-    phone,
-    address,
     seo { ${SEO_FIELDS} },
     socialMedia[] {
       platform,
       url
     },
     headerNavigation[] {
-      label,
-      url,
-      openInNewTab,
+      ${LINK_FIELDS},
       children[] {
-        label,
-        url,
-        openInNewTab
+        ${LINK_FIELDS}
       }
     },
     headerCta[] {
@@ -54,13 +47,9 @@ export const SITE_SETTINGS_QUERY = groq`
       ${CTA_BTN_FIELDS}
     },
     footerNavigation[] {
-      label,
-      url,
-      openInNewTab,
+      ${LINK_FIELDS},
       children[] {
-        label,
-        url,
-        openInNewTab,
+        ${LINK_FIELDS},
         logo {
           alt,
           "url": asset->url,
@@ -73,7 +62,6 @@ export const SITE_SETTINGS_QUERY = groq`
     "footerDescription": bottomDescription,
     googleAnalyticsId,
     googleTagManagerId,
-    facebookPixelId,
     headerScripts,
     footerScripts,
     maintenanceMode {
@@ -99,8 +87,23 @@ export const SEO_SETTINGS_QUERY = groq`
  */
 export const NAVIGATION_QUERY = groq`
   *[_type == "globalConfiguration" && _id == "globalConfiguration"][0] {
-    headerNavigation,
-    footerNavigation
+    headerNavigation[] {
+      ${LINK_FIELDS},
+      children[] {
+        ${LINK_FIELDS}
+      }
+    },
+    footerNavigation[] {
+      ${LINK_FIELDS},
+      children[] {
+        ${LINK_FIELDS},
+        logo {
+          alt,
+          "url": asset->url,
+          iconSvg
+        }
+      }
+    }
   }
 `
 
@@ -110,7 +113,6 @@ export const NAVIGATION_QUERY = groq`
 export const ANALYTICS_QUERY = groq`
   *[_type == "globalConfiguration" && _id == "globalConfiguration"][0] {
     googleAnalyticsId,
-    googleTagManagerId,
-    facebookPixelId
+    googleTagManagerId
   }
 `

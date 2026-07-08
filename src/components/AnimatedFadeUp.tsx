@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
+import { LcpContext } from '@/components/AnimatedSection';
 
 type MotionTag =
 	| 'div'
@@ -29,6 +30,7 @@ interface AnimatedFadeUpProps {
 	duration?: number;
 	y?: number;
 	isHero?: boolean;
+	isLcp?: boolean;
 	as?: MotionTag;
 }
 
@@ -39,19 +41,22 @@ export default function AnimatedFadeUp({
 	duration = 0.6,
 	y = 20,
 	isHero = false,
+	isLcp = false,
 	as = 'div',
 }: AnimatedFadeUpProps) {
 	const MotionComponent = motion[as];
+	const isLcpFromContext = useContext(LcpContext);
+	const activeIsLcp = isLcp || isLcpFromContext;
 
-	if (isHero) {
+	if (isHero || activeIsLcp) {
 		return (
 			<MotionComponent
-				initial={{ opacity: 0, y }}
-				animate={{ opacity: 1, y: 0 }}
+				initial={activeIsLcp ? { y } : { opacity: 0, y }}
+				animate={activeIsLcp ? { y: 0 } : { opacity: 1, y: 0 }}
 				transition={{
 					duration,
 					delay,
-					ease: [0.215, 0.61, 0.355, 1], // Cubic-bezier for smooth deceleration
+					ease: [0.215, 0.61, 0.355, 1],
 				}}
 				className={className}>
 				{children}

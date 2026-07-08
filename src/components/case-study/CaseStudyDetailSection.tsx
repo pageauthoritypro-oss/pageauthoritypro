@@ -60,29 +60,33 @@ export default function CaseStudyDetailSection({ post }: CaseStudyDetailSectionP
 				</div>
 
 				{showSidebar ? (
-					<div className='grid grid-cols-1 lg:grid-cols-[1fr_387px] gap-6 items-start'>
+					<div className='grid grid-cols-1 lg:grid-cols-[1fr_387px] gap-6 items-stretch'>
 						<CaseStudyContent post={post} />
-						<aside className='flex flex-col gap-5 lg:sticky lg:top-20'>
+						<aside className='flex flex-col gap-5'>
 							{post.author && (
-								<AuthorCard
-									author={post.author}
-									title={post.aboutAuthorTitle}
-									showViewAllLink={post.showViewAllBlogs}
-									bottomText={post.authorBottomText}
-								/>
+								<div className='relative'>
+									<AuthorCard
+										author={post.author}
+										title={post.aboutAuthorTitle}
+										showViewAllLink={post.showViewAllBlogs}
+										bottomText={post.authorBottomText}
+									/>
+								</div>
 							)}
-							{post.body && post.body.length > 0 && (
-								<TableOfContents body={post.body as PortableTextBlock[]} />
-							)}
-							{post.bookCallCard && (
-								<BookCallWidget
-									heading={post.bookCallCard.heading}
-									description={post.bookCallCard.description}
-									icon={post.bookCallCard.icon}
-									ctas={post.bookCallCard.ctas}
-								/>
-							)}
-							<SharePost heading={post.sharePost?.heading} platforms={post.sharePost?.platforms} />
+							<div className='flex flex-col gap-5 lg:sticky lg:top-20'>
+								{post.body && post.body.length > 0 && (
+									<TableOfContents body={post.body as PortableTextBlock[]} />
+								)}
+								{post.bookCallCard && (
+									<BookCallWidget
+										heading={post.bookCallCard.heading}
+										description={post.bookCallCard.description}
+										icon={post.bookCallCard.icon}
+										ctas={post.bookCallCard.ctas}
+									/>
+								)}
+								<SharePost heading={post.sharePost?.heading} platforms={post.sharePost?.platforms} />
+							</div>
 						</aside>
 					</div>
 				) : (

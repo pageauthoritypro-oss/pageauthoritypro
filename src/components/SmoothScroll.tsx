@@ -23,6 +23,11 @@ export default function SmoothScroll() {
 		let rafId: number | null = null;
 
 		const initLenis = () => {
+			// Skip scroll jacking on mobile/touch devices to preserve native momentum scrolling
+			if (window.matchMedia('(pointer: coarse)').matches) {
+				return true;
+			}
+
 			const win = window as unknown as WindowWithLenis;
 			const LenisClass = win.Lenis;
 			if (!LenisClass) return false;

@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import './globals.css';
 import { SanityLive } from '@/sanity/lib/live';
-import { draftMode } from 'next/headers';
+import { draftMode, headers } from 'next/headers';
 import { StudioRouteGate, VisualEditingGate } from '@/components/sanity-live-wrapper';
 import { Toaster } from '@/components/ui/sonner';
 import { getSiteSettings } from '@/sanity/helpers/settings';
+import { MaintenanceMode } from '@/components/MaintenanceMode';
+import { CustomScriptsInjector } from '@/components/CustomScriptsInjector';
 
 const satoshi = localFont({
 	src: [
@@ -83,12 +86,46 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const { isEnabled: isDraftMode } = await draftMode();
+	const headersList = await headers();
+	const isStudioRoute = (headersList.get('x-pathname') ?? '').startsWith('/studio');
+	const settings = await getSiteSettings({ cache: true });
+	const { googleAnalyticsId, googleTagManagerId, headerScripts, footerScripts } = settings ?? {};
+
+	const page = isStudioRoute ? children : <MaintenanceMode>{children}</MaintenanceMode>;
 
 	return (
 		<html lang='en' className={`${satoshi.variable} h-full antialiased`}>
-			<head />
+			<head>
+				{!isStudioRoute && googleTagManagerId && (
+					<Script id='gtm-script' strategy='afterInteractive'>
+						{`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${googleTagManagerId}');`}
+					</Script>
+				)}
+				{!isStudioRoute && googleAnalyticsId && (
+					<>
+						<Script src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} strategy='afterInteractive' />
+						<Script id='google-analytics' strategy='afterInteractive'>
+							{`window.dataLayer = window.dataLayer || [];
+							function gtag(){dataLayer.push(arguments);}
+							gtag('js', new Date());
+							gtag('config', '${googleAnalyticsId}');`}
+						</Script>
+					</>
+				)}
+				{!isStudioRoute && headerScripts && <CustomScriptsInjector html={headerScripts} target='head' />}
+			</head>
 			<body className='min-h-full flex flex-col'>
-				{children}
+				{!isStudioRoute && googleTagManagerId && (
+					<noscript>
+						<iframe
+							src={`https://www.googletagmanager.com/ns.html?id=${googleTagManagerId}`}
+							height='0'
+							width='0'
+							style={{ display: 'none', visibility: 'hidden' }}
+						/>
+					</noscript>
+				)}
+				{page}
 				<Toaster
 					position='bottom-right'
 					toastOptions={{
@@ -106,6 +143,7 @@ export default async function RootLayout({
 					{/* VisualEditingGate renders click-to-edit overlays only inside the Presentation Tool's iframe */}
 					{isDraftMode && <VisualEditingGate />}
 				</StudioRouteGate>
+				{!isStudioRoute && footerScripts && <CustomScriptsInjector html={footerScripts} target='body' />}
 			</body>
 		</html>
 	);

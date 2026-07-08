@@ -107,6 +107,16 @@ export function clearSettingsCache(): void {
  * Check if site is in maintenance mode
  */
 export async function isMaintenanceMode(): Promise<boolean> {
+  const maintenance = await getMaintenanceMode();
+  return maintenance?.enabled ?? false;
+}
+
+/**
+ * Get the maintenance mode settings (enabled flag + custom message)
+ */
+export async function getMaintenanceMode(): Promise<
+  SiteSettings["maintenanceMode"] | null
+> {
   const settings = await getSiteSettings();
-  return settings?.maintenanceMode?.enabled ?? false;
+  return settings?.maintenanceMode ?? null;
 }

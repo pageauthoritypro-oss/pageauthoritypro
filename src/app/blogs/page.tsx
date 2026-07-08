@@ -70,12 +70,12 @@ export default async function BlogIndexPage() {
 		<main id='main-content'>
 			{page?.enableSmoothScroll && <SmoothScroll />}
 			{sanityHero && (
-				<AnimatedSection isHero>
+				<AnimatedSection isHero isLcp>
 					<HeroSection {...sanityHero} />
 				</AnimatedSection>
 			)}
 			{article && (
-				<AnimatedSection>
+				<AnimatedSection isLcp={!!sanityHero}>
 					<FeaturedArticleSection
 						article={article}
 						heading={featuredSection?.heading as unknown as SanityHeadingPart[] | undefined}

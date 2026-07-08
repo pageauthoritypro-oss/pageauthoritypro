@@ -1,6 +1,6 @@
 # Page Authority Pro Deploy
 
-A modern Next.js 16 application with Sanity CMS integration, featuring real-time content updates, advanced SEO, and visual editing capabilities
+A modern Next.js 16 application with Sanity CMS integration, featuring real-time content updates, advanced SEO, and visual editing capabilities.
 
 ---
 

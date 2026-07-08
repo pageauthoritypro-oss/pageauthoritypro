@@ -148,7 +148,7 @@ export default function SectionRenderer({ sections }: Props) {
 				const overlapPrevious = previousSection?._type === 'heroSection';
 
 				return (
-					<AnimatedSection key={section._key} isHero={isHero}>
+					<AnimatedSection key={section._key} isHero={isHero} isLcp={i === 0 || overlapPrevious}>
 						{render(section, overlapPrevious)}
 					</AnimatedSection>
 				);

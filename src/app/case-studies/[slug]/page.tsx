@@ -38,7 +38,7 @@ export default async function CaseStudyDetailPage({ params }: Props) {
 	return (
 		<main id='main-content'>
 			{post.seo?.schemaMarkup && renderJsonLd(post.seo.schemaMarkup)}
-			<AnimatedSection isHero>
+			<AnimatedSection isHero isLcp>
 				<CaseStudyDetailSection post={post} />
 			</AnimatedSection>
 			{sanityCtaSection && (

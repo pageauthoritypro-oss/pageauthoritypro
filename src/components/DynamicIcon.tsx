@@ -1,21 +1,40 @@
-import type { SVGProps } from 'react';
-import * as LucideIcons from 'lucide-react';
+import { createElement, type ComponentType, type SVGProps } from 'react';
+import dynamic from 'next/dynamic';
+import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { stegaClean } from 'next-sanity';
 import { CUSTOM_ICONS } from '@/components/icons';
 import Image from 'next/image';
 import type { SanityLogoItem } from '@/sanity/types';
+import type { LucideProps } from 'lucide-react';
 
 interface DynamicIconProps extends Omit<SVGProps<SVGSVGElement>, 'name' | 'width' | 'height'> {
 	icon: string | SanityLogoItem;
 	size?: number;
 }
 
-// Convert "kebab-case" or "lowercase" to "PascalCase" for Lucide lookup
-function toPascalCase(str: string): string {
+// Convert CamelCase/PascalCase or lowercase to kebab-case for Lucide dynamicIconImports lookup
+function toKebabCase(str: string): string {
 	return str
-		.split('-')
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join('');
+		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+		.replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+		.toLowerCase();
+}
+
+// Predefined map to translate legacy/CMS values to standard Lucide names
+const ICON_MAPPING: Record<string, string> = {
+	tick: 'check',
+	cross: 'x',
+	cancel: 'x',
+};
+
+// Cache dynamically loaded icon components to prevent unmounting/remounting on re-render
+const dynamicCache: Record<string, ComponentType<LucideProps>> = {};
+
+function getDynamicIcon(name: keyof typeof dynamicIconImports) {
+	if (!dynamicCache[name]) {
+		dynamicCache[name] = dynamic(dynamicIconImports[name]);
+	}
+	return dynamicCache[name];
 }
 
 export default function DynamicIcon({ icon, size, className, ...props }: DynamicIconProps) {
@@ -32,7 +51,7 @@ export default function DynamicIcon({ icon, size, className, ...props }: Dynamic
 					.replace(/<svg/i, `<svg class="${className || ''}" width="${size}" height="${size}"`);
 			} else {
 				cleanedSvg = cleanedSvg.replace(/<svg/i, `<svg class="${className || ''}"`);
-			} 
+			}
 			return (
 				<span
 					style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
@@ -63,13 +82,18 @@ export default function DynamicIcon({ icon, size, className, ...props }: Dynamic
 		return <CustomIcon width={lucideSize} height={lucideSize} className={className} {...props} />;
 	}
 
-	// 2. Try exact Lucide match (already PascalCase)
-	// 3. Try converting lowercase/kebab-case → PascalCase
-	const lucideName = (LucideIcons[icon as keyof typeof LucideIcons] ? icon : toPascalCase(icon)) as keyof typeof LucideIcons;
+	// 2. Try mapping CMS names to standard Lucide icons, then convert to kebab-case
+	let normalizedIcon = icon;
+	const mapped = ICON_MAPPING[normalizedIcon.toLowerCase()];
+	if (mapped) {
+		normalizedIcon = mapped;
+	}
 
-	const LucideIcon = LucideIcons[lucideName] as LucideIcons.LucideIcon | undefined;
-	if (LucideIcon) {
-		return <LucideIcon size={lucideSize} className={className} {...props} />;
+	const kebabName = toKebabCase(normalizedIcon);
+
+	if (kebabName in dynamicIconImports) {
+		const iconComponent = getDynamicIcon(kebabName as keyof typeof dynamicIconImports);
+		return createElement(iconComponent, { size: lucideSize, className, ...props });
 	}
 
 	return null;

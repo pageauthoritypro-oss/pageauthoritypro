@@ -24,7 +24,6 @@ export default function CtaSection(props: CtaSectionData) {
 						fill
 						className='aspect-auto object-contain object-center opacity-16'
 						sizes='(max-width: 768px) 120px, 360px'
-						priority
 					/>
 				</div>
 			</div>
@@ -38,7 +37,6 @@ export default function CtaSection(props: CtaSectionData) {
 						fill
 						className='aspect-auto object-contain object-center opacity-16'
 						sizes='(max-width: 768px) 120px, 360px'
-						priority
 					/>
 				</div>
 			</div>
@@ -46,7 +44,7 @@ export default function CtaSection(props: CtaSectionData) {
 				<div
 					aria-hidden='true'
 					className='pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full inset-0 select-none -z-10 mix-blend-screen'>
-					<Image src={bgImage} alt='' fill className='object-cover object-top opacity-20' priority />
+					<Image src={bgImage} alt='' fill className='object-cover object-top opacity-20' />
 				</div>
 			)}
 			<div className='flex flex-col gap-[75px]'>
@@ -96,10 +94,10 @@ export default function CtaSection(props: CtaSectionData) {
 											key={i}
 											href={btn.url}
 											variant={isSecondary ? 'secondary' : 'primary'}
-											className='w-full sm:w-auto flex items-center justify-center gap-2 group font-medium py-3 px-4'
+											className='w-full sm:w-auto flex items-center justify-center group'
 											target={btn.target}>
 											<span>{btn.cta_text}</span>
-											{btn.icon && <DynamicIcon icon={btn.icon} size={18} />}
+											{btn.icon && <DynamicIcon icon={btn.icon} size={16} />}
 										</CtaLink>
 									);
 								})}

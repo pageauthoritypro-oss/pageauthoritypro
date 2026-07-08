@@ -42,9 +42,6 @@ export interface SiteSettings {
   headerLogoUrl?: string
   headerLogoSvg?: string
   faviconUrl?: string
-  email?: string
-  phone?: string
-  address?: string
   seo?: AdvancedSeoSettings
   socialMedia?: SocialMedia[]
   headerNavigation?: NavigationItem[]
@@ -57,7 +54,6 @@ export interface SiteSettings {
   footerDescription?: string
   googleAnalyticsId?: string
   googleTagManagerId?: string
-  facebookPixelId?: string
   headerScripts?: string
   footerScripts?: string
   maintenanceMode?: MaintenanceMode

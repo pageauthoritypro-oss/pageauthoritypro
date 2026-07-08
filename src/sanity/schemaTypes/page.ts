@@ -1,5 +1,6 @@
 import { defineType, defineField, defineArrayMember } from "sanity";
 import { DocumentsIcon } from "@sanity/icons";
+import { PageUrlHelper } from "../components/PageUrlHelper";
 
 // 1. Centralized registry of sections and their associated groups
 const SECTION_REGISTRY = [
@@ -81,6 +82,15 @@ export const pages = defineType({
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: "pageUrl",
+      title: "Page URL Helper",
+      type: "string",
+      group: "basic",
+      components: {
+        input: PageUrlHelper,
+      },
     }),
     defineField({
       name: "enableSmoothScroll",

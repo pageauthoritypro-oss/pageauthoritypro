@@ -1,5 +1,5 @@
 import { groq } from 'next-sanity';
-import { CTA_BTN_FIELDS, SEO_FIELDS } from './fragments';
+import { CTA_BTN_FIELDS, SEO_FIELDS, LINK_FIELDS } from './fragments';
 
 export const PAGE_QUERY = groq`
   *[_type == "pages" && slug.current == $slug][0] {
@@ -137,7 +137,7 @@ export const PAGE_QUERY = groq`
           icon { "url": asset->url, alt, iconSvg },
           title,
           description,
-          learnMoreLink { label, url, target }
+          learnMoreLink { ${LINK_FIELDS} }
         }
       },
       _type == "howItWorksSection" => {
@@ -257,9 +257,7 @@ export const PAGE_QUERY = groq`
           },
           badge,
           link {
-            label,
-            url,
-            target
+            ${LINK_FIELDS}
           }
         }
       },

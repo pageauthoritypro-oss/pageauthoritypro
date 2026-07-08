@@ -3,7 +3,7 @@ import Footer from '@/components/layout/Footer';
 import SectionRenderer from '@/components/SectionRenderer';
 import { getSiteSettings } from '@/sanity/helpers/settings';
 import Navbar from '@/components/layout/Navbar';
-import Link from 'next/link';
+import CtaLink from '@/components/CtaLink';
 
 export default async function NotFound() {
 	const settings = await getSiteSettings({ cache: false });
@@ -24,11 +24,9 @@ export default async function NotFound() {
 					<p className='font-satoshi text-base text-[#B4BAC2] mb-8 max-w-md relative z-10'>
 						The page you are looking for cannot be found.
 					</p>
-					<Link
-						href='/'
-						className='relative z-10 px-8 py-3.5 bg-[#C7933D] text-[#060D15] rounded-full font-bold hover:bg-[#C7933D]/90 transition-all font-satoshi text-[16px] min-w-[160px] text-center inline-flex items-center justify-center'>
+					<CtaLink href='/' variant='primary' className='relative z-10'>
 						Go Home
-					</Link>
+					</CtaLink>
 				</main>
 				<Footer settings={settings} />
 			</>

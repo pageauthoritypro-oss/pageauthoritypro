@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -7,13 +7,15 @@ import {
   Dialog,
   Flex,
   Heading,
+  Select,
   Spinner,
   Stack,
   Text,
+  TextInput,
   Badge,
   Tooltip,
 } from '@sanity/ui';
-import { CloseIcon, EnvelopeIcon, TrashIcon } from '@sanity/icons';
+import { CloseIcon, EnvelopeIcon, SearchIcon, TrashIcon } from '@sanity/icons';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,6 +42,8 @@ interface ApiResponse {
   error?: string;
 }
 
+type DatePreset = 'all' | 'today' | '7days' | '30days' | 'month' | 'custom';
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDate(iso: string) {
@@ -54,6 +58,71 @@ function formatDate(iso: string) {
 
 function getFieldValue(fields: FieldEntry[], key: string) {
   return fields.find((f) => f.name === key)?.value ?? '—';
+}
+
+// Buckets submissions into relative date groups for display, mirroring a
+// typical inbox layout (Today / Yesterday / This Week / This Month / Older).
+const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'] as const;
+
+function getDateGroupLabel(iso: string): (typeof GROUP_ORDER)[number] {
+  const date = new Date(iso);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - 7);
+  const startOfMonth = new Date(startOfToday);
+  startOfMonth.setDate(startOfMonth.getDate() - 30);
+
+  if (date >= startOfToday) return 'Today';
+  if (date >= startOfYesterday) return 'Yesterday';
+  if (date >= startOfWeek) return 'This Week';
+  if (date >= startOfMonth) return 'This Month';
+  return 'Older';
+}
+
+function groupSubmissions(submissions: Submission[]) {
+  const map = new Map<string, Submission[]>();
+  for (const submission of submissions) {
+    const label = getDateGroupLabel(submission.createdAt);
+    if (!map.has(label)) map.set(label, []);
+    map.get(label)!.push(submission);
+  }
+  return GROUP_ORDER.filter((label) => map.has(label)).map((label) => ({
+    label,
+    items: map.get(label)!,
+  }));
+}
+
+// Resolves a date-preset selection into ISO from/to bounds for the API query.
+function getPresetRange(preset: DatePreset, customFrom: string, customTo: string): { from?: string; to?: string } {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (preset) {
+    case 'today':
+      return { from: startOfToday.toISOString() };
+    case '7days': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 6);
+      return { from: from.toISOString() };
+    }
+    case '30days': {
+      const from = new Date(startOfToday);
+      from.setDate(from.getDate() - 29);
+      return { from: from.toISOString() };
+    }
+    case 'month':
+      return { from: new Date(now.getFullYear(), now.getMonth(), 1).toISOString() };
+    case 'custom':
+      return {
+        from: customFrom ? new Date(`${customFrom}T00:00:00`).toISOString() : undefined,
+        to: customTo ? new Date(`${customTo}T23:59:59`).toISOString() : undefined,
+      };
+    default:
+      return {};
+  }
 }
 
 // ─── Drawer ───────────────────────────────────────────────────────────────────
@@ -369,6 +438,86 @@ function SubmissionRow({
   );
 }
 
+// ─── Filter Bar ────────────────────────────────────────────────────────────────
+
+function FilterBar({
+  searchInput,
+  onSearchChange,
+  datePreset,
+  onDatePresetChange,
+  customFrom,
+  customTo,
+  onCustomFromChange,
+  onCustomToChange,
+  onClear,
+  hasActiveFilters,
+  isLoading,
+}: {
+  searchInput: string;
+  onSearchChange: (value: string) => void;
+  datePreset: DatePreset;
+  onDatePresetChange: (value: DatePreset) => void;
+  customFrom: string;
+  customTo: string;
+  onCustomFromChange: (value: string) => void;
+  onCustomToChange: (value: string) => void;
+  onClear: () => void;
+  hasActiveFilters: boolean;
+  isLoading: boolean;
+}) {
+  return (
+    <Card padding={3} radius={2} tone="transparent" border style={{ opacity: isLoading ? 0.7 : 1, transition: 'opacity 0.2s' }}>
+      <Flex gap={3} wrap="wrap" align="center" style={{ pointerEvents: isLoading ? 'none' : 'auto' }}>
+        <Box flex={1} style={{ minWidth: 220 }}>
+          <TextInput
+            icon={SearchIcon}
+            placeholder="Search name, email, phone, message…"
+            value={searchInput}
+            onChange={(e) => onSearchChange(e.currentTarget.value)}
+          />
+        </Box>
+
+        <Box style={{ minWidth: 160 }}>
+          <Select
+            value={datePreset}
+            onChange={(e) => onDatePresetChange(e.currentTarget.value as DatePreset)}
+          >
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="7days">Last 7 days</option>
+            <option value="30days">Last 30 days</option>
+            <option value="month">This month</option>
+            <option value="custom">Custom range</option>
+          </Select>
+        </Box>
+
+        {datePreset === 'custom' && (
+          <>
+            <Box style={{ minWidth: 150 }}>
+              <TextInput
+                type="date"
+                value={customFrom}
+                onChange={(e) => onCustomFromChange(e.currentTarget.value)}
+              />
+            </Box>
+            <Box style={{ minWidth: 150 }}>
+              <TextInput
+                type="date"
+                value={customTo}
+                onChange={(e) => onCustomToChange(e.currentTarget.value)}
+              />
+            </Box>
+          </>
+        )}
+
+        {hasActiveFilters && (
+          <Button text="Clear filters" mode="ghost" onClick={onClear} style={{ cursor: 'pointer' }} />
+        )}
+      </Flex>
+    </Card>
+  );
+}
+
 // ─── Main Tool ────────────────────────────────────────────────────────────────
 
 export function ContactSubmissionsTool() {
@@ -386,8 +535,33 @@ export function ContactSubmissionsTool() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Filters
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [datePreset, setDatePreset] = useState<DatePreset>('all');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+
   const [refreshKey, setRefreshKey] = useState(0);
   const LIMIT = 20;
+
+  // Debounce search input
+  useEffect(() => {
+    const timeout = setTimeout(() => setSearch(searchInput.trim()), 400);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  const { from, to } = useMemo(
+    () => getPresetRange(datePreset, customFrom, customTo),
+    [datePreset, customFrom, customTo],
+  );
+
+  const hasActiveFilters = Boolean(search || datePreset !== 'all');
+
+  // Reset to first page whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, from, to]);
 
   const fetchSubmissions = useCallback(() => {
     setLoading(true);
@@ -395,10 +569,23 @@ export function ContactSubmissionsTool() {
     setRefreshKey((k) => k + 1);
   }, []);
 
+  const clearFilters = useCallback(() => {
+    setSearchInput('');
+    setSearch('');
+    setDatePreset('all');
+    setCustomFrom('');
+    setCustomTo('');
+  }, []);
+
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    fetch(`/api/contact/submissions?page=${page}&limit=${LIMIT}`, { signal: controller.signal })
+    const params = new URLSearchParams({ page: String(page), limit: String(LIMIT) });
+    if (search) params.set('search', search);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+
+    fetch(`/api/contact/submissions?${params.toString()}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data: ApiResponse) => {
         if (!active) return;
@@ -418,7 +605,7 @@ export function ContactSubmissionsTool() {
       active = false;
       controller.abort();
     };
-  }, [page, refreshKey]);
+  }, [page, refreshKey, search, from, to]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTargetId) return;
@@ -434,6 +621,8 @@ export function ContactSubmissionsTool() {
       setDeleting(false);
     }
   }, [deleteTargetId, fetchSubmissions]);
+
+  const groups = useMemo(() => groupSubmissions(submissions), [submissions]);
 
   return (
     <Box height="fill" style={{ overflowY: 'auto' }}>
@@ -455,11 +644,29 @@ export function ContactSubmissionsTool() {
             />
           </Flex>
 
-          {/* Loading */}
+          {/* Filters */}
+          <FilterBar
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+            datePreset={datePreset}
+            onDatePresetChange={setDatePreset}
+            customFrom={customFrom}
+            customTo={customTo}
+            onCustomFromChange={setCustomFrom}
+            onCustomToChange={setCustomTo}
+            onClear={clearFilters}
+            hasActiveFilters={hasActiveFilters}
+            isLoading={loading}
+          />
+
+          {/* Loading - Prominent loader above list */}
           {loading && (
-            <Flex align="center" justify="center" padding={6}>
-              <Spinner />
-            </Flex>
+            <Card padding={4} radius={2} tone="default" style={{ background: 'var(--card-bg-color)', borderColor: 'var(--card-border-color)' }}>
+              <Flex align="center" justify="center" gap={3}>
+                <Spinner />
+                <Text size={1} muted>Fetching submissions…</Text>
+              </Flex>
+            </Card>
           )}
 
           {/* Error */}
@@ -474,25 +681,36 @@ export function ContactSubmissionsTool() {
             <Card padding={6} radius={2} tone="transparent" border>
               <Stack space={3} style={{ textAlign: 'center' }}>
                 <Text size={3}>📭</Text>
-                <Text size={2} muted>No submissions yet</Text>
+                <Text size={2} muted>
+                  {hasActiveFilters ? 'No submissions match these filters' : 'No submissions yet'}
+                </Text>
               </Stack>
             </Card>
           )}
 
-          {/* List */}
+          {/* List, grouped by relative date */}
           {!loading && !error && submissions.length > 0 && (
-            <Stack space={2}>
-              {submissions.map((s) => (
-                <SubmissionRow
-                  key={s.id}
-                  submission={s}
-                  isSelected={selected?.id === s.id}
-                  onClick={() => setSelected((prev) => (prev?.id === s.id ? null : s))}
-                  onDeleteRequest={(e) => {
-                    e.stopPropagation();
-                    setDeleteTargetId(s.id);
-                  }}
-                />
+            <Stack space={5}>
+              {groups.map((group) => (
+                <Stack key={group.label} space={3}>
+                  <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {group.label}
+                  </Text>
+                  <Stack space={2}>
+                    {group.items.map((s) => (
+                      <SubmissionRow
+                        key={s.id}
+                        submission={s}
+                        isSelected={selected?.id === s.id}
+                        onClick={() => setSelected((prev) => (prev?.id === s.id ? null : s))}
+                        onDeleteRequest={(e) => {
+                          e.stopPropagation();
+                          setDeleteTargetId(s.id);
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                </Stack>
               ))}
             </Stack>
           )}

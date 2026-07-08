@@ -3,7 +3,6 @@ import CtaLink from '@/components/CtaLink';
 import BackgroundScript from '@/components/home/BackgroundScript';
 import SectionContainer from '@/components/layout/SectionContainer';
 import type { HeroSectionData } from '@/sanity/types';
-
 import AnimatedFadeUp from '@/components/AnimatedFadeUp';
 import DynamicHeading from '@/components/DynamicHeading';
 import DynamicIcon from '@/components/DynamicIcon';
@@ -16,12 +15,14 @@ export default function HeroSection(props: Partial<HeroSectionData> = {}) {
 	const heroImageUrl = props.heroImage;
 
 	return (
-		<section className='relative overflow-hidden bg-hero-bg'>
-			<div className='absolute inset-0 z-0 pointer-events-none'>
-				<div className='w-full h-full relative pointer-events-none'>
-					{props.backgroundScript && <BackgroundScript script={props.backgroundScript} />}
+		<section className='relative overflow-hidden bg-hero-bg' aria-labelledby='hero-heading'>
+			{props.backgroundScript && (
+				<div className='absolute inset-0 z-0 pointer-events-none'>
+					<div className='w-full h-full relative pointer-events-none'>
+						<BackgroundScript script={props.backgroundScript} />
+					</div>
 				</div>
-			</div>
+			)}
 			<div className='relative w-full lg:min-h-236'>
 				{heroImageUrl && (
 					<div aria-hidden='true' className='absolute right-0 bottom-0 z-0 hidden w-full lg:block lg:h-190.75 select-none'>
@@ -29,9 +30,10 @@ export default function HeroSection(props: Partial<HeroSectionData> = {}) {
 							src={heroImageUrl}
 							alt=''
 							fill
-							sizes='50vw'
-							className='mask-[linear-gradient(to_right,#060D1500_0%,#060D15_95%)] [-webkit-mask-image:linear-gradient(to_right,#060D1500_0%,#060D15_95%)] object-contain object-bottom-right'
 							priority
+							fetchPriority='high'
+							sizes='50vw'
+							className='hidden lg:block mask-[linear-gradient(to_right,#060D1500_0%,#060D15_95%)] [-webkit-mask-image:linear-gradient(to_right,#060D1500_0%,#060D15_95%)] object-contain object-bottom-right'
 						/>
 					</div>
 				)}
@@ -46,9 +48,7 @@ export default function HeroSection(props: Partial<HeroSectionData> = {}) {
 					<div className='flex flex-col gap-6 pt-32 pb-16 lg:w-184 lg:pt-48 lg:pb-0'>
 						{eyebrow && (
 							<AnimatedFadeUp isHero delay={0.05}>
-								<p
-									className='flex items-center justify-center font-heading font-medium tracking-[0.08em] text-brand-gold text-[12px] bg-brand-gold/5 py-1.5 px-3 rounded-full w-fit'
-									style={{ border: '1.2px solid #C7933D' }}>
+								<p className='flex items-center justify-center h-[31px] font-heading font-medium leading-none tracking-[0.08em] text-brand-gold text-[14px] bg-brand-gold/5 py-1.5 px-3 rounded-full w-fit shadow-[inset_0_0_0_1.2px_#C7933D]'>
 									{eyebrow}
 								</p>
 							</AnimatedFadeUp>
@@ -60,6 +60,7 @@ export default function HeroSection(props: Partial<HeroSectionData> = {}) {
 									<DynamicHeading
 										heading={heading}
 										tag='h1'
+										id='hero-heading'
 										className='font-heading font-medium tracking-normal text-[40px] leading-11 lg:text-[64px] lg:leading-18'
 										isHero={true}
 										delay={0.15}

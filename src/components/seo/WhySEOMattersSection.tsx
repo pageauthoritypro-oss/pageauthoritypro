@@ -27,7 +27,7 @@ export default function WhySEOMattersSection({
 			<AnimatedFadeUp>
 				<div className='flex flex-wrap justify-center items-center gap-4'>
 					{ctaBtns.map((btn, i) => (
-						<CtaLink key={i} href={btn.url} variant={btn.variant} target={btn.target} className='flex items-center gap-2.5'>
+						<CtaLink key={i} href={btn.url} variant={btn.variant} target={btn.target} className='flex items-center'>
 							<span>{btn.cta_text}</span>
 							{btn.icon && <DynamicIcon icon={btn.icon} size={16} />}
 						</CtaLink>
