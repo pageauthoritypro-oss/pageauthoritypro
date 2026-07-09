@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import SectionContainer from '@/components/layout/SectionContainer';
@@ -41,7 +42,18 @@ export default function FeaturedArticleSection({ article, heading, overlapPrevio
 				<div className='flex flex-col lg:flex-row rounded-lg overflow-hidden gap-[26px] bg-[#08101C] border-[0.5px] border-[rgba(255,255,255,0.08)]'>
 					{/* Image area */}
 					<div className='relative shrink-0 aspect-video sm:aspect-2/1 lg:aspect-auto lg:w-[50%] xl:w-[594px] min-h-[260px] lg:min-h-0'>
-						<div className='absolute inset-0 bg-[linear-gradient(135deg,#C7933D_0%,#61481E_100%)]' />
+						{article.image ? (
+							<Image
+								src={article.image}
+								alt={article.title}
+								fill
+								priority
+								className='object-cover'
+								sizes='(min-width: 1024px) 50vw, 100vw'
+							/>
+						) : (
+							<div className='absolute inset-0 bg-[linear-gradient(135deg,#C7933D_0%,#61481E_100%)]' />
+						)}
 						<span className='absolute top-4 left-4 inline-flex items-center font-heading font-normal text-[12px] uppercase leading-none rounded-[40px] px-3 py-1.5 bg-[#F5F5F5] text-[#011324]'>
 							★ Featured
 						</span>

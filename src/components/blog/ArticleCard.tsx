@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { BlogArticle } from '@/sanity/types/blog';
@@ -15,7 +16,17 @@ export default function ArticleCard({ article }: { article: BlogArticle }) {
 		<article className='flex flex-col rounded-lg overflow-hidden border-t border-[#8C8C8C]/15 bg-[#08101C] shadow-[0px_2px_12px_rgba(0,0,0,0.02)]'>
 			{/* Image area */}
 			<div className='relative aspect-video w-full'>
-				<div className='absolute inset-0 bg-[linear-gradient(135deg,#C7933D_0%,#61481E_100%)]' />
+				{article.image ? (
+					<Image
+						src={article.image}
+						alt={article.title}
+						fill
+						className='object-cover'
+						sizes='(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+					/>
+				) : (
+					<div className='absolute inset-0 bg-[linear-gradient(135deg,#C7933D_0%,#61481E_100%)]' />
+				)}
 				<span className='absolute top-4 left-4 inline-flex items-center font-heading font-medium text-[12px] leading-[15px] tracking-[0.083em] uppercase rounded-[40px] px-3 py-1.5 bg-[#F5F5F5] text-[#000000]'>
 					{article.category}
 				</span>

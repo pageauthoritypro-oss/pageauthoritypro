@@ -76,4 +76,5 @@ export interface BlogArticle {
 	description: string;
 	author: { name: string; initials: string; date: string };
 	href: string;
+	image?: string;
 }
