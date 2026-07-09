@@ -48,6 +48,7 @@ export default async function BlogIndexPage() {
 					date: formatDate(featuredPost.publishedAt),
 				},
 				href: `/blogs/${(featuredPost.slug as { current: string })?.current ?? ''}`,
+				image: featuredPost.image as string | undefined,
 		  }
 		: undefined;
 
@@ -61,6 +62,7 @@ export default async function BlogIndexPage() {
 			date: formatDate(blog.publishedAt as string),
 		},
 		href: `/blogs/${(blog.slug as { current: string })?.current ?? ''}`,
+		image: blog.image as string | undefined,
 	}));
 
 	const categories = ['All', ...allCategories.map((c) => c.title)];
