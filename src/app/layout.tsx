@@ -8,6 +8,7 @@ import { StudioRouteGate, VisualEditingGate } from '@/components/sanity-live-wra
 import { Toaster } from '@/components/ui/sonner';
 import { getSiteSettings } from '@/sanity/helpers/settings';
 import { MaintenanceMode } from '@/components/MaintenanceMode';
+import DraftModeBanner from '@/components/DraftModeBanner';
 import { CustomScriptsInjector } from '@/components/CustomScriptsInjector';
 
 const satoshi = localFont({
@@ -91,7 +92,11 @@ export default async function RootLayout({
 	const settings = await getSiteSettings({ cache: true });
 	const { googleAnalyticsId, googleTagManagerId, headerScripts, footerScripts } = settings ?? {};
 
-	const page = isStudioRoute ? children : <MaintenanceMode>{children}</MaintenanceMode>;
+	// Draft mode is enabled by the Presentation Tool's preview iframe (loading real
+	// page URLs, not /studio), so it must bypass maintenance mode the same way
+	// Studio itself does - otherwise editors can't preview/edit while it's on.
+	const bypassMaintenance = isStudioRoute || isDraftMode;
+	const page = bypassMaintenance ? children : <MaintenanceMode>{children}</MaintenanceMode>;
 
 	return (
 		<html lang='en' className={`${satoshi.variable} h-full antialiased`}>
@@ -126,6 +131,7 @@ export default async function RootLayout({
 					</noscript>
 				)}
 				{page}
+				{isDraftMode && !isStudioRoute && <DraftModeBanner />}
 				<Toaster
 					position='bottom-right'
 					toastOptions={{

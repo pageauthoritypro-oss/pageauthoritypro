@@ -18,7 +18,7 @@ import SeoFoundationSection from '@/components/attorney/SeoFoundationSection';
 import StatsSection from '@/components/seo/StatsSection';
 import SEOServicesSection from '@/components/seo/SEOServicesSection';
 import WhySEOMattersSection from '@/components/seo/WhySEOMattersSection';
-import FeaturedArticlesCategorySection, { FeaturedArticlesCategoryProps } from '@/components/blog/FeaturedArticlesCategorySection';
+import BlogListingSection from '@/components/blog/BlogListingSection';
 import WhyGoogleAdsMatterSection from '@/components/google-ads/WhyGoogleAdsMatterSection';
 import GrowthSystemSection from '@/components/google-ads/GrowthSystemSection';
 import ResultsSection from '@/components/google-ads/ResultsSection';
@@ -54,6 +54,7 @@ import type {
 	ServicesSectionData,
 	SeoFeaturesSectionData,
 	CaseAcquisitionSectionData,
+	FeaturedArticlesCategorySectionData,
 	CampaignPlansSectionData,
 	GrowthServicesSectionData,
 	MarketingAuditSectionData,
@@ -76,7 +77,7 @@ const SECTION_MAP: Record<string, SectionRenderFn> = {
 		<CompanyLogoSection {...(section as CompanyLogoSectionData)} overlapPrevious={overlapPrevious} />
 	),
 	specializedAreaSection: (section) => <AreasOfLawSection {...(section as SpecializedAreaSectionData)} />,
-	cardsGrid: (section) => <CaseStudiesSection {...(section as CardsGridSectionData)} />,
+	// cardsGrid is handled as an async component below (like featuredArticlesCategory)
 	numbersSection: (section) => <NumbersSection {...(section as NumbersSectionData)} />,
 	comparisonSection: (section) => <ComparisonSection {...(section as ComparisonSectionData)} />,
 	vsComparisonSection: (section) => <VsComparisonSection data={section as VsComparisonSectionData} />,
@@ -113,7 +114,7 @@ const SECTION_MAP: Record<string, SectionRenderFn> = {
 		<WhySEOMattersSection {...(section as SeoFeaturesSectionData)} overlapPrevious={overlapPrevious} />
 	),
 	caseAcquisitionSection: (section) => <CaseAcquisitionSection {...(section as CaseAcquisitionSectionData)} />,
-	featuredArticlesCategory: (section) => <FeaturedArticlesCategorySection {...(section as FeaturedArticlesCategoryProps)} />,
+	// featuredArticlesCategory is handled as an async component below (like cardsGrid)
 	campaignPlansSection: (section, overlapPrevious) => (
 		<CoreServicesSection {...(section as CampaignPlansSectionData)} overlapPrevious={overlapPrevious} />
 	),
@@ -139,17 +140,32 @@ export default function SectionRenderer({ sections }: Props) {
 	return (
 		<>
 			{sections.map((section, i) => {
-				const render = SECTION_MAP[section._type];
-				if (!render) return null;
 				const isHero = section._type === 'heroSection' || section._type === 'companyLogoSection';
 
-				// Determine if the previous section was heroSection
 				const previousSection = i > 0 ? sections[i - 1] : null;
 				const overlapPrevious = previousSection?._type === 'heroSection';
 
+				// Async server components that handle their own data fetching (initial page load);
+				// pagination/filtering beyond that is handled client-side within them.
+				let content: React.ReactNode;
+				if (section._type === 'cardsGrid') {
+					content = <CaseStudiesSection {...(section as CardsGridSectionData)} />;
+				} else if (section._type === 'featuredArticlesCategory') {
+					content = (
+						<BlogListingSection
+							{...(section as FeaturedArticlesCategorySectionData)}
+							overlapPrevious={overlapPrevious}
+						/>
+					);
+				} else {
+					const render = SECTION_MAP[section._type];
+					if (!render) return null;
+					content = render(section, overlapPrevious);
+				}
+
 				return (
 					<AnimatedSection key={section._key} isHero={isHero} isLcp={i === 0 || overlapPrevious}>
-						{render(section, overlapPrevious)}
+						{content}
 					</AnimatedSection>
 				);
 			})}

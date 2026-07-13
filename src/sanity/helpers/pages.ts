@@ -8,9 +8,6 @@ import {
 } from "@/sanity/queries/pages";
 import type { Page } from "@/sanity/types/advanced";
 
-/**
- * Fetch a single page by slug with live updates
- */
 export async function getPage(slug: string): Promise<Page | null> {
   try {
     const { data } = await sanityFetch({

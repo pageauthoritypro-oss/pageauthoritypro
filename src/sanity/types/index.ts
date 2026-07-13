@@ -3,6 +3,7 @@
  */
 
 import type { PortableTextBlock } from '@portabletext/react';
+import type { SanityBlogPost } from './blog';
 
 export interface SeoSettings {
 	metaTitle?: string;
@@ -388,9 +389,14 @@ export interface CardsGridSectionData {
 	_type: 'cardsGrid';
 	_key: string;
 	header?: SanityHeaderSection;
-	caseStudies?: CaseStudyItem[];
-	maxCardToShow?: number;
+	caseStudies?: Array<{
+		_id?: string;
+		_ref?: string;
+		_type: string;
+	}>;
 	cardVariant?: 'primary' | 'secondary';
+	useManualOrder?: boolean;
+	cardsPerPage?: number;
 }
 
 export interface UnderperformCardItem {
@@ -492,19 +498,18 @@ export interface CaseAcquisitionSectionData {
 export interface FeaturedArticlesCategorySectionData {
 	_type: 'featuredArticlesCategory';
 	_key: string;
-	heading: string;
-	featuredPost: {
-		_ref: string;
-		_type: 'reference';
-	};
+	heading: SanityHeadingPart[];
+	featuredPost?: SanityBlogPost;
 	showFilter?: boolean;
+	useManualOrder?: boolean;
 	enabledCategories?: Array<{
-		_ref: string;
-		_type: 'reference';
+		_id: string;
+		title: string;
+		slug: { current: string };
 	}>;
 	blogs?: Array<{
-		_ref: string;
-		_type: 'reference';
+		_id: string;
+		categoryTitle?: string;
 	}>;
 	blogsPerPage?: number;
 }
@@ -631,15 +636,6 @@ export interface CaseStudyItem {
 	caseStudyMetrics?: CaseStudyMetricItem[];
 }
 
-export interface CardsGridSectionData {
-	_type: 'cardsGrid';
-	_key: string;
-	header?: SanityHeaderSection;
-	caseStudies?: CaseStudyItem[];
-	maxCardToShow?: number;
-	cardVariant?: 'primary' | 'secondary';
-}
-
 export interface UnderperformCardItem {
 	title: string;
 	icon?: SanityLogoItem;
@@ -736,26 +732,6 @@ export interface CaseAcquisitionSectionData {
 	header?: SanityHeaderSection;
 	cards?: CaseAcquisitionCard[];
 }
-export interface FeaturedArticlesCategorySectionData {
-	_type: 'featuredArticlesCategory';
-	_key: string;
-	heading: string;
-	featuredPost: {
-		_ref: string;
-		_type: 'reference';
-	};
-	showFilter?: boolean;
-	enabledCategories?: Array<{
-		_ref: string;
-		_type: 'reference';
-	}>;
-	blogs?: Array<{
-		_ref: string;
-		_type: 'reference';
-	}>;
-	blogsPerPage?: number;
-}
-
 export interface ChecklistCheckpoint {
 	_key?: string;
 	icon: 'checkCircle' | 'tick' | 'cross';

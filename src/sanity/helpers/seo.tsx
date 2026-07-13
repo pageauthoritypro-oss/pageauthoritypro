@@ -17,9 +17,6 @@ function stripSiteNameSuffix(title: string, siteName: string): string {
   return trimmed;
 }
 
-/**
- * Generate Next.js metadata from advanced SEO settings
- */
 export function generateMetadata(
   seo?: AdvancedSeoSettings,
   siteSeo?: AdvancedSeoSettings,
@@ -72,9 +69,6 @@ export function generateMetadata(
   return metadata;
 }
 
-/**
- * Generate breadcrumb schema.org JSON-LD
- */
 export function generateBreadcrumbSchema(
   items: Array<{ name: string; url: string }>,
 ) {
@@ -90,11 +84,6 @@ export function generateBreadcrumbSchema(
   };
 }
 
-
-
-/**
- * Render JSON-LD script tag
- */
 export function renderJsonLd(data: Record<string, unknown>) {
   return (
     <script

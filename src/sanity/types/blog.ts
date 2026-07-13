@@ -52,12 +52,14 @@ export interface BookCallCardData {
 export interface SanityBlogPost {
 	_id: string;
 	title: SanityHeadingPart[];
-	titleText: string;
+	titleText?: string;
 	backLabel?: string;
-	slug: string;
+	slug: { current: string } | string;
 	description?: string;
+	excerpt?: string;
 	publishedAt?: string;
 	featuredImageUrl?: string;
+	image?: string;
 	body?: PortableTextBlock[];
 	category?: { _id: string; title: string; slug: string };
 	author?: SanityBlogAuthor;

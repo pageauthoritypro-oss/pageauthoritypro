@@ -10,8 +10,18 @@ interface ContactSubmissionRow {
 	createdAt: Date;
 }
 
+function isAuthorized(request: NextRequest): boolean {
+	const secret = process.env.STUDIO_API_SECRET;
+	if (!secret) return false;
+	return request.headers.get('x-studio-secret') === secret;
+}
+
 export async function GET(request: NextRequest) {
 	// Only allow requests from Sanity Studio
+	if (!isAuthorized(request)) {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
 	const { searchParams } = new URL(request.url);
 	const page = parseInt(searchParams.get('page') || '1', 10);
 	const limit = parseInt(searchParams.get('limit') || '20', 10);
@@ -63,6 +73,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+	if (!isAuthorized(request)) {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
 	const { searchParams } = new URL(request.url);
 	const id = searchParams.get('id');
 

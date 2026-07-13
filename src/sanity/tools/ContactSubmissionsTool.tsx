@@ -60,6 +60,10 @@ function getFieldValue(fields: FieldEntry[], key: string) {
   return fields.find((f) => f.name === key)?.value ?? '—';
 }
 
+const STUDIO_API_HEADERS: HeadersInit = {
+  'x-studio-secret': process.env.NEXT_PUBLIC_STUDIO_API_SECRET ?? '',
+};
+
 // Buckets submissions into relative date groups for display, mirroring a
 // typical inbox layout (Today / Yesterday / This Week / This Month / Older).
 const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'] as const;
@@ -205,7 +209,6 @@ function SubmissionDrawer({
               justify="space-between"
               padding={4}
               style={{
-                // borderBottom: '1px solid var(--card-border-color)',
                 flexShrink: 0,
               }}
             >
@@ -585,7 +588,10 @@ export function ContactSubmissionsTool() {
     if (from) params.set('from', from);
     if (to) params.set('to', to);
 
-    fetch(`/api/contact/submissions?${params.toString()}`, { signal: controller.signal })
+    fetch(`/api/contact/submissions?${params.toString()}`, {
+      signal: controller.signal,
+      headers: STUDIO_API_HEADERS,
+    })
       .then((res) => res.json())
       .then((data: ApiResponse) => {
         if (!active) return;
@@ -611,7 +617,10 @@ export function ContactSubmissionsTool() {
     if (!deleteTargetId) return;
     setDeleting(true);
     try {
-      await fetch(`/api/contact/submissions?id=${deleteTargetId}`, { method: 'DELETE' });
+      await fetch(`/api/contact/submissions?id=${deleteTargetId}`, {
+        method: 'DELETE',
+        headers: STUDIO_API_HEADERS,
+      });
       setSelected((prev) => (prev?.id === deleteTargetId ? null : prev));
       setDeleteTargetId(null);
       fetchSubmissions();

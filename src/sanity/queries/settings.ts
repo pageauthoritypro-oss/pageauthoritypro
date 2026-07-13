@@ -1,9 +1,6 @@
 import { groq } from 'next-sanity'
 import { CTA_BTN_FIELDS, SEO_FIELDS, LINK_FIELDS } from './fragments'
 
-/**
- * GROQ query to fetch all site settings (singleton)
- */
 export const SITE_SETTINGS_QUERY = groq`
   *[_type == "globalConfiguration" && _id == "globalConfiguration"][0] {
     _id,

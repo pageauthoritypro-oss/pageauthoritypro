@@ -11,13 +11,15 @@ export function PageUrlHelper() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const currentSlug = slug?.current || "";
 
-  // Decide route path
-  let path = `/${currentSlug}`;
-  if (currentSlug === "index" || currentSlug === "home" || !currentSlug) {
-    path = "/";
-  }
+  // Decide route path (homepage docs use slug "/" and render at the root)
+  const isHome =
+    !currentSlug ||
+    currentSlug === "/" ||
+    currentSlug === "index" ||
+    currentSlug === "home";
+  const path = isHome ? undefined : `/${currentSlug}`;
 
-  const absoluteUrl = `${baseUrl}${path}`;
+  const absoluteUrl = `${baseUrl}${path ?? ""}`;
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(absoluteUrl);

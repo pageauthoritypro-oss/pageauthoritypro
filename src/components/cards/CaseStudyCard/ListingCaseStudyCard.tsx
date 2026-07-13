@@ -71,7 +71,7 @@ export default function ListingCaseStudyCard({
 										</p>
 									)}
 									{title && (
-										<CardTitle className='text-lg font-heading font-medium tracking-normal leading-[125%] text-white group-hover:text-brand-gold transition-transform duration-500 ease-out'>
+										<CardTitle className='text-lg font-heading font-medium tracking-normal leading-[125%] text-white group-hover:text-brand-gold transition-transform duration-500 ease-out line-clamp-2'>
 											{getHeadingText(title)}
 										</CardTitle>
 									)}

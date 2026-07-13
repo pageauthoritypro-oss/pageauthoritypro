@@ -92,3 +92,77 @@ export const CASE_STUDY_BY_SLUG_QUERY = groq`
 export const CASE_STUDY_PATHS_QUERY = groq`
   *[_type == "caseStudy" && defined(slug.current)][].slug.current
 `;
+
+export const PAGINATED_BLOGS_QUERY = groq`
+  *[_type == "blog" && (!defined($category) || $category == "All" || category->title == $category) && (!defined($excludeId) || _id != $excludeId)] | order(_createdAt desc) [$start...$end] {
+    _id,
+    "title": array::join(title[].text, " "),
+    slug,
+    excerpt,
+    description,
+    "image": image.asset->url,
+    category-> { _id, title, slug },
+    publishedAt,
+    author-> { _id, name, "image": image.asset->url }
+  }
+`;
+
+export const TOTAL_BLOGS_COUNT_QUERY = groq`
+  count(*[_type == "blog" && (!defined($category) || $category == "All" || category->title == $category) && (!defined($excludeId) || _id != $excludeId)])
+`;
+
+export const RESOLVE_BLOGS_BY_IDS_QUERY = groq`
+  *[_type == "blog" && _id in $ids] {
+    _id,
+    "title": array::join(title[].text, " "),
+    slug,
+    excerpt,
+    description,
+    "image": image.asset->url,
+    category-> { _id, title, slug },
+    publishedAt,
+    author-> { _id, name, "image": image.asset->url }
+  }
+`;
+
+export const PAGINATED_CASE_STUDIES_QUERY = groq`
+  *[_type == "caseStudy"] | order(_createdAt desc) [$start...$end] {
+    _id,
+    "title": array::join(title[].text, " "),
+    "slug": "/case-studies/" + slug.current,
+    tags[]->{_id, title, slug},
+    location->{_id, name, "slug": slug.current, area},
+    description,
+    excerpt,
+    "image": image.asset->url,
+    caseStudyMetrics[] {
+      value,
+      label,
+      isHighlighted,
+      variant
+    }
+  }
+`;
+
+export const TOTAL_CASE_STUDIES_COUNT_QUERY = groq`
+  count(*[_type == "caseStudy"])
+`;
+
+export const RESOLVE_CASE_STUDIES_BY_IDS_QUERY = groq`
+  *[_type == "caseStudy" && _id in $ids] {
+    _id,
+    "title": array::join(title[].text, " "),
+    "slug": "/case-studies/" + slug.current,
+    tags[]->{_id, title, slug},
+    location->{_id, name, "slug": slug.current, area},
+    description,
+    excerpt,
+    "image": image.asset->url,
+    caseStudyMetrics[] {
+      value,
+      label,
+      isHighlighted,
+      variant
+    }
+  }
+`;
