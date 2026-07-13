@@ -35,10 +35,10 @@ export default function ArticleCard({ article }: { article: BlogArticle }) {
 			{/* Content */}
 			<div className='flex flex-col justify-between gap-3 p-8 flex-1'>
 				<div className='flex flex-col gap-3'>
-					<h3 className='font-heading font-bold text-[22px] leading-[27.5px] text-white'>
+					<h3 className='font-heading font-bold text-[22px] leading-[27.5px] text-white line-clamp-2'>
 						{article.title}
 					</h3>
-					<p className='font-heading font-normal text-[14px] leading-6 text-[#B5BBC3]'>
+					<p className='font-heading font-normal text-[14px] leading-6 text-[#B5BBC3] line-clamp-2'>
 						{article.description}
 					</p>
 				</div>

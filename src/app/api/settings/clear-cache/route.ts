@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import { clearSettingsCache } from "@/sanity/helpers/settings";
+import { revalidatePath } from "next/cache";
 
-/**
- * POST /api/settings/clear-cache
- * Clear the site settings cache
- */
 export async function POST() {
   try {
-    clearSettingsCache();
+    revalidatePath("/", "layout");
 
     return NextResponse.json({
       success: true,

@@ -182,7 +182,8 @@ export const PAGE_QUERY = groq`
       },
       _type == "cardsGrid" => {
         cardVariant,
-        maxCardToShow,
+        useManualOrder,
+        cardsPerPage,
         "header": headerSection {
           eyebrow { text, position },
           heading[] { text, isHighlighted, variant },
@@ -191,21 +192,10 @@ export const PAGE_QUERY = groq`
           cta_btn[] { ${CTA_BTN_FIELDS} },
           cta_button_position
         },
-        caseStudies[]-> {
+        caseStudies[] {
           _id,
-          "title": array::join(title[].text, " "),
-          "slug": "/case-studies/" + slug.current,
-          tags[]->{...},
-          location->{...},
-          description,
-          excerpt,
-          "image": image.asset->url,
-          caseStudyMetrics[] {
-            value,
-            label,
-            isHighlighted,
-            variant
-          }
+          _ref,
+          _type
         }
       },
       _type == "growthMetricsSection" => {
@@ -401,6 +391,7 @@ export const PAGE_QUERY = groq`
       _type == "featuredArticlesCategory" => {
         heading[] { text, isHighlighted, variant },
         showFilter,
+        useManualOrder,
         featuredPost-> {
           _id,
           "title": array::join(title[].text, " "),
@@ -413,30 +404,10 @@ export const PAGE_QUERY = groq`
           author-> { _id, name, "image": image.asset->url }
         },
         enabledCategories[]-> { _id, title, slug },
-        "blogs": select(
-          defined(blogs) && count(blogs) > 0 => blogs[]-> {
-            _id,
-            "title": array::join(title[].text, " "),
-            slug,
-            excerpt,
-            description,
-            "image": image.asset->url,
-            category-> { _id, title, slug },
-            publishedAt,
-            author-> { _id, name, "image": image.asset->url }
-          },
-          *[_type == "blog"] | order(publishedAt desc) {
-            _id,
-            "title": array::join(title[].text, " "),
-            slug,
-            excerpt,
-            description,
-            "image": image.asset->url,
-            category-> { _id, title, slug },
-            publishedAt,
-            author-> { _id, name, "image": image.asset->url }
-          }
-        ),
+        blogs[]-> {
+          _id,
+          "categoryTitle": category->title
+        },
         blogsPerPage
       },
       _type == "notFoundSection" => {

@@ -7,53 +7,26 @@ import {
 } from "@/sanity/queries/settings";
 import type { SiteSettings } from "@/sanity/types";
 
-// Cache settings for 5 minutes
-const CACHE_DURATION = 5 * 60 * 1000;
-let cachedSettings: { data: SiteSettings | null; timestamp: number } | null =
-  null;
-
-/**
- * Fetch all site settings with optional caching
- * Uses Sanity Live for real-time updates
- */
+// `options.cache` is accepted for backward compatibility with existing call
+// sites but no longer changes behavior - sanityFetch's own revalidate window
+// (see src/sanity/lib/live.ts) already provides Next's shared Data Cache. A
+// separate in-memory cache here doesn't work reliably across serverless
+// instances and was causing settings (including maintenance mode) to serve
+// stale data for far longer than intended.
 export async function getSiteSettings(
-  options: { cache?: boolean } = { cache: true },
+  _options: { cache?: boolean } = { cache: true },
 ): Promise<SiteSettings | null> {
-  // Return cached data if valid
-  if (
-    options.cache &&
-    process.env.NODE_ENV !== "development" &&
-    cachedSettings &&
-    Date.now() - cachedSettings.timestamp < CACHE_DURATION
-  ) {
-    return cachedSettings.data;
-  }
-
   try {
     const { data } = await sanityFetch({
       query: SITE_SETTINGS_QUERY,
     });
-
-    const settings = data as SiteSettings | null;
-
-    // Update cache
-    if (options.cache) {
-      cachedSettings = {
-        data: settings,
-        timestamp: Date.now(),
-      };
-    }
-
-    return settings;
+    return data as SiteSettings | null;
   } catch (error) {
     console.error("Error fetching site settings:", error);
     return null;
   }
 }
 
-/**
- * Fetch only SEO settings
- */
 export async function getSeoSettings() {
   try {
     const { data } = await sanityFetch({
@@ -66,9 +39,6 @@ export async function getSeoSettings() {
   }
 }
 
-/**
- * Fetch only navigation settings
- */
 export async function getNavigationSettings() {
   try {
     const { data } = await sanityFetch({
@@ -81,9 +51,6 @@ export async function getNavigationSettings() {
   }
 }
 
-/**
- * Fetch only analytics settings
- */
 export async function getAnalyticsSettings() {
   try {
     const { data } = await sanityFetch({
@@ -96,24 +63,11 @@ export async function getAnalyticsSettings() {
   }
 }
 
-/**
- * Clear the settings cache
- */
-export function clearSettingsCache(): void {
-  cachedSettings = null;
-}
-
-/**
- * Check if site is in maintenance mode
- */
 export async function isMaintenanceMode(): Promise<boolean> {
   const maintenance = await getMaintenanceMode();
   return maintenance?.enabled ?? false;
 }
 
-/**
- * Get the maintenance mode settings (enabled flag + custom message)
- */
 export async function getMaintenanceMode(): Promise<
   SiteSettings["maintenanceMode"] | null
 > {

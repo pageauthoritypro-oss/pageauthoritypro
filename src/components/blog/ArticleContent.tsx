@@ -34,7 +34,7 @@ export default function ArticleContent({ post }: ArticleContentProps) {
 				<div className='w-full rounded-2xl overflow-hidden aspect-793/430 relative'>
 					<Image
 						src={post.featuredImageUrl}
-						alt={post.description ?? post.titleText}
+						alt={post.description ?? post.titleText ?? ""}
 						fill
 						priority
 						fetchPriority='high'

@@ -43,34 +43,31 @@ export const featuredArticlesCategory = defineType({
       title: "Manual Blog List Selection",
       type: "array",
       of: [{ type: "reference", to: [{ type: "blog" }] }],
-      description: "Manually select which blogs should appear below the filters. If left empty, all blogs will be queried dynamically.",
-      validation: (Rule) =>
-        Rule.custom((blogs, context) => {
-          if (!blogs || !Array.isArray(blogs)) return true;
-          const parent = context.parent as { featuredPost?: { _ref: string } };
-          const featuredRef = parent?.featuredPost?._ref;
-          if (!featuredRef) return true;
-
-          const duplicate = blogs.some(
-            (blog: unknown) =>
-              typeof blog === "object" &&
-              blog !== null &&
-              "_ref" in blog &&
-              (blog as { _ref: string })._ref === featuredRef
-          );
-          if (duplicate) {
-            return "A blog post selected as 'Featured Article' cannot also be included in the manual selection list.";
-          }
-          return true;
-        }),
+      description: "Manually select which blogs should appear below the filters. If left empty, all blogs will be queried dynamically by creation date. They will appear in the exact order selected below.",
+    }),
+    defineField({
+      name: "useManualOrder",
+      title: "Use Manual Blog Order",
+      type: "boolean",
+      initialValue: false,
+      description: "If enabled, blogs will be displayed in the exact order selected in the 'Manual Blog List Selection' above. If disabled, all blogs will be queried dynamically by creation date.",
     }),
     defineField({
       name: "blogsPerPage",
       title: "Blogs Per Page / Limit",
       type: "number",
+      options: {
+        list: [
+          { title: "3 Blogs", value: 3 },
+          { title: "6 Blogs", value: 6 },
+          { title: "9 Blogs", value: 9 },
+          { title: "12 Blogs", value: 12 },
+          { title: "15 Blogs", value: 15 },
+        ],
+      },
       initialValue: 6,
-      validation: (Rule) => Rule.min(1),
-      description: "Maximum number of blogs to display in the grid.",
+      validation: (Rule) => Rule.required(),
+      description: "Select how many blogs to show per page.",
     }),
   ],
   preview: {
