@@ -26,7 +26,7 @@ function CheckIcon({ type = 'checkCircle' }: { type?: string }) {
 export default function ChecklistBlock({ checklist }: Props) {
 	if (!checklist || checklist.length === 0) return null;
 	return (
-		<div className='mb-7.5 px-6 bg-[rgba(8,16,28,1)] rounded-2xl'>
+		<div className='mb-7.5 px-6 py-6 bg-[rgba(8,16,28,1)] rounded-2xl'>
 			<ul className='grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3'>
 				{checklist.map((item, i) => (
 					<li key={item._key ?? i} className='flex items-start gap-2.5'>

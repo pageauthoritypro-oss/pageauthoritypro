@@ -24,7 +24,10 @@ export const BLOG_BY_SLUG_QUERY = groq`
       }
     },
     "category": category->{ _id, title, "slug": slug.current },
-    "author": author->{ _id, name, role, "avatarUrl": image.asset->url, bio },
+    "author": author->{
+      _id, name, role, "avatarUrl": image.asset->url, bio, email,
+      social[] { platform, url }
+    },
     hideSidebar,
     aboutAuthorTitle,
     showViewAllBlogs,
@@ -73,7 +76,10 @@ export const CASE_STUDY_BY_SLUG_QUERY = groq`
     "location": location->{ _id, name, area },
     tags[]->{ _id, title, "slug": slug.current },
     caseStudyMetrics[],
-    "author": author->{ _id, name, role, "avatarUrl": image.asset->url, bio },
+    "author": author->{
+      _id, name, role, "avatarUrl": image.asset->url, bio, email,
+      social[] { platform, url }
+    },
     hideSidebar,
     aboutAuthorTitle,
     showViewAllBlogs,

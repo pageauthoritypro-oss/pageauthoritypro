@@ -2,6 +2,14 @@ import { getInitials, formatDate } from '@/lib/utils';
 import type { SanityHeadingPart } from '@/sanity/types';
 import type { BlogArticle, SanityBlogPost } from '@/sanity/types/blog';
 
+// Editors type a literal "\n" inside a title part to force a line break on the
+// detail page's heading. Card titles are single-line, so collapse any literal
+// or real newline into a plain space instead of leaking "\n" into the text.
+export function sanitizeCardTitle(title?: string): string {
+	if (!title) return '';
+	return title.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export function mapToArticle(blog: SanityBlogPost): BlogArticle {
 	let titleStr = '';
 	const blogTitle = blog.title as unknown;
@@ -14,7 +22,7 @@ export function mapToArticle(blog: SanityBlogPost): BlogArticle {
 	}
 	return {
 		category: blog.category?.title ?? 'Blog',
-		title: titleStr,
+		title: sanitizeCardTitle(titleStr),
 		description: blog.excerpt ?? blog.description ?? '',
 		author: {
 			name: blog.author?.name ?? 'Author',

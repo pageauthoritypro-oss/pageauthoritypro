@@ -3,11 +3,18 @@ import type { SanityHeadingPart } from './index';
 import type { AdvancedSeoSettings } from './advanced';
 export type { SanityHeadingPart };
 
+export interface AuthorSocialLink {
+	platform: string;
+	url: string;
+}
+
 export interface BlogAuthor {
 	name: string;
 	role?: string;
 	bio?: string;
 	avatarUrl?: string;
+	email?: string;
+	social?: AuthorSocialLink[];
 }
 
 export interface BlogStrategyCard {
@@ -40,6 +47,8 @@ export interface SanityBlogAuthor {
 	role?: string;
 	avatarUrl?: string;
 	bio?: string;
+	email?: string;
+	social?: AuthorSocialLink[];
 }
 
 export interface BookCallCardData {

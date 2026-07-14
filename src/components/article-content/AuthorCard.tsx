@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import SocialIconLink from './SocialIconLink';
+import type { AuthorSocialLink } from '@/sanity/types/blog';
 
 interface Author {
 	name: string;
 	role?: string;
 	bio?: string;
 	avatarUrl?: string;
+	email?: string;
+	social?: AuthorSocialLink[];
 }
 
 interface Props {
@@ -65,6 +69,22 @@ export default function AuthorCard({ author, title, showViewAllLink, bottomText 
 				<p className='font-heading font-normal text-[14px] leading-[20px] text-[#B4BAC2]'>
 					{bottomText ?? author.bio}
 				</p>
+			)}
+
+			{author.email && (
+				<a
+					href={`mailto:${author.email}`}
+					className='font-heading font-medium text-[14px] leading-[20px] text-[#C7933D] hover:opacity-80 transition-opacity w-fit'>
+					{author.email}
+				</a>
+			)}
+
+			{author.social && author.social.length > 0 && (
+				<div className='flex items-center gap-3'>
+					{author.social.map((item, i) => (
+						<SocialIconLink key={i} {...item} />
+					))}
+				</div>
 			)}
 		</div>
 	);

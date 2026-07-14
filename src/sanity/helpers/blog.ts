@@ -16,6 +16,15 @@ import {
 import type { SanityBlogPost } from '@/sanity/types/blog';
 import type { SanityCaseStudyPost } from '@/sanity/types/case-study';
 import type { CaseStudyItem } from '@/sanity/types';
+import { sanitizeCardTitle } from '@/sanity/helpers/blog-mappers';
+
+function sanitizeCaseStudyTitles(caseStudies: CaseStudyItem[]): CaseStudyItem[] {
+	return caseStudies.map((cs) => {
+		const rawTitle =
+			typeof cs.title === 'string' ? cs.title : cs.title.map((part) => part.text || '').join(' ');
+		return { ...cs, title: sanitizeCardTitle(rawTitle) };
+	});
+}
 
 export async function getBlogBySlug(slug: string): Promise<SanityBlogPost | null> {
 	try {
@@ -132,7 +141,7 @@ export async function getDynamicPaginatedCaseStudies({
 		]);
 
 		return {
-			caseStudies: (caseStudiesResult.data as CaseStudyItem[]) || [],
+			caseStudies: sanitizeCaseStudyTitles((caseStudiesResult.data as CaseStudyItem[]) || []),
 			totalCount: (countResult.data as number) || 0,
 		};
 	} catch (error) {
@@ -145,7 +154,7 @@ export async function getCaseStudiesByIds(ids: string[]): Promise<CaseStudyItem[
 	if (!ids.length) return [];
 	try {
 		const { data } = await sanityFetch({ query: RESOLVE_CASE_STUDIES_BY_IDS_QUERY, params: { ids } });
-		return (data as CaseStudyItem[]) || [];
+		return sanitizeCaseStudyTitles((data as CaseStudyItem[]) || []);
 	} catch (error) {
 		console.error('Error resolving case studies by ids:', error);
 		return [];
