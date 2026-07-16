@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,11 +11,11 @@ import DynamicHeading from '@/components/DynamicHeading';
 import DynamicIcon from '@/components/DynamicIcon';
 import FieldRenderer from '@/components/form/FieldRenderer';
 import Honeypot from '@/components/form/Honeypot';
-import Turnstile from '@/components/form/Turnstile';
+import Turnstile, { type TurnstileHandle } from '@/components/form/Turnstile';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Form } from '@/components/ui/form';
-import { contactFormSchema, MESSAGE_MIN_WORDS } from '@/lib/validations/contact';
+import { contactFormSchema, formatPhoneNumber, MESSAGE_MIN_WORDS } from '@/lib/validations/contact';
 import type { ContactFormValues } from '@/components/form/types';
 import type { ContactFormSectionData } from '@/sanity/types';
 
@@ -25,6 +25,11 @@ interface Props {
 
 export default function ContactFormSection({ data }: Props) {
 	const { header, contactInfo, formFields, submitButtonText } = data;
+	const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+	const [captchaToken, setCaptchaToken] = useState('');
+	const [formKey, setFormKey] = useState(0);
+	const turnstileRef = useRef<TurnstileHandle>(null);
 
 	const form = useForm<ContactFormValues>({
 		resolver: zodResolver(contactFormSchema),
@@ -39,29 +44,51 @@ export default function ContactFormSection({ data }: Props) {
 
 	const handleVerify = useCallback(
 		(token: string) => {
+			setCaptchaToken(token);
 			setValue('turnstileToken', token);
 		},
 		[setValue],
 	);
 
-	const onSubmit = handleSubmit(async (values) => {
-		try {
-			const response = await fetch('/api/contact', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(values),
-			});
-			const data = await response.json();
-			if (!response.ok) {
-				toast.error(data?.error ?? 'Something went wrong. Please try again.');
-				return;
+	const handleExpire = useCallback(() => {
+		setCaptchaToken('');
+		setValue('turnstileToken', '');
+	}, [setValue]);
+
+	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		handleSubmit(async (values) => {
+			try {
+				const formattedValues = {
+					...values,
+					phone: formatPhoneNumber(values.phone),
+				};
+				const response = await fetch('/api/contact', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(formattedValues),
+				});
+				const data = await response.json();
+
+				// A Turnstile token can only be verified once, so every submit attempt —
+				// success or failure — burns it. Reset the widget so the next attempt
+				// gets a fresh token instead of silently failing with a stale one.
+				turnstileRef.current?.reset();
+				setCaptchaToken('');
+
+				if (!response.ok) {
+					toast.error(data?.error ?? 'Something went wrong. Please try again.');
+					return;
+				}
+				toast.success("Message sent! We'll get back to you within 24 hours.");
+				reset();
+				setFormKey((key) => key + 1);
+			} catch {
+				turnstileRef.current?.reset();
+				setCaptchaToken('');
+				toast.error('Something went wrong. Please try again.');
 			}
-			toast.success("Message sent! We'll get back to you within 24 hours.");
-			reset();
-		} catch {
-			toast.error('Something went wrong. Please try again.');
-		}
-	});
+		})(e);
+	};
 
 	return (
 		<section className='bg-background w-full py-16 lg:py-24'>
@@ -117,7 +144,7 @@ export default function ContactFormSection({ data }: Props) {
 							<div className='flex flex-col gap-[11px]'>
 								{formFields.map((field) => (
 									<FieldRenderer
-										key={field._key ?? field.name}
+										key={`${field._key ?? field.name}-${formKey}`}
 										field={{
 											name: field.name,
 											label: field.label,
@@ -131,12 +158,12 @@ export default function ContactFormSection({ data }: Props) {
 							</div>
 						)}
 
-						<Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} onVerify={handleVerify} />
+						<Turnstile ref={turnstileRef} siteKey={captchaSiteKey} onVerify={handleVerify} onExpire={handleExpire} />
 
 						<Button
 							type='submit'
 							variant='solid'
-							disabled={isSubmitting}
+							disabled={isSubmitting || !captchaSiteKey || !captchaToken}
 							aria-busy={isSubmitting}
 							className='flex h-[52px] w-full items-center justify-center gap-2'>
 							{isSubmitting ? (

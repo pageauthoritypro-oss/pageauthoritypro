@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { client } from '@/sanity/lib/client';
 
+export const revalidate = 3600; // Revalidate every hour
+
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pageauthoritypro.com';
 
 const NON_ROUTE_PAGE_SLUGS = ['blog-details', 'case-study-details'];
@@ -36,13 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			`*[_type == "blog" && defined(slug.current) && !(_id in path("drafts.**"))] | order(publishedAt desc) {
 				"slug": slug.current,
 				"updatedAt": _updatedAt
-			}`
+			}`,
 		),
 		client.fetch<Array<{ slug: string; updatedAt: string }>>(
 			`*[_type == "caseStudy" && defined(slug.current) && !(_id in path("drafts.**"))] | order(publishedAt desc) {
 				"slug": slug.current,
 				"updatedAt": _updatedAt
-			}`
+			}`,
 		),
 	]);
 

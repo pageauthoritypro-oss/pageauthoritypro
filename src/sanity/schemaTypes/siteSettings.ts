@@ -1,5 +1,6 @@
 import { defineType, defineField } from "sanity";
 import { CogIcon } from "@sanity/icons";
+import { extractGoogleMapsEmbedSrc } from "@/lib/googleMapsEmbed";
 
 export const globalConfiguration = defineType({
   name: "globalConfiguration",
@@ -128,6 +129,22 @@ export const globalConfiguration = defineType({
       description: "Each item represents a column in the footer with a title and links (use 'Sub Items' for links).",
       type: "array",
       of: [{ type: "navigationItem" }],
+      group: "footer",
+    }),
+    defineField({
+      name: "footerMapEmbed",
+      title: "Footer Map Embed",
+      description:
+        "In Google Maps: Share → Embed a map → copy the code, and paste the whole thing here. Leave empty to hide the map.",
+      type: "text",
+      rows: 4,
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          if (!value) return true;
+          return extractGoogleMapsEmbedSrc(value)
+            ? true
+            : "Couldn't find a Google Maps embed link in this. Make sure you copied the embed code from Google Maps' Share → Embed a map option.";
+        }),
       group: "footer",
     }),
     defineField({

@@ -21,35 +21,48 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 	const [containerWidth, setContainerWidth] = useState(1240);
 	const [windowWidth, setWindowWidth] = useState(1200);
 	const [windowHeight, setWindowHeight] = useState(800);
+	const [headerHeight, setHeaderHeight] = useState(0);
 	const [isFullSectionSticky, setIsFullSectionSticky] = useState(true);
 	const [galleryStickyTop, setGalleryStickyTop] = useState<number | null>(null);
 
 	// Measure container width, window width, and content height for dynamic stickiness
 	useEffect(() => {
+		let rafId: number | null = null;
+
 		const updateDimensions = () => {
-			setWindowWidth(window.innerWidth);
-			setWindowHeight(window.innerHeight);
-			let currentContainerWidth = 1240;
-			if (galleryRef.current) {
-				currentContainerWidth = galleryRef.current.offsetWidth;
-				setContainerWidth(currentContainerWidth);
-			}
+			if (rafId) window.cancelAnimationFrame(rafId);
 
-			// Determine if the whole section fits within the viewport height minus the fixed nav.
-			const headerHeight = headerRef.current?.offsetHeight || 0;
-			const galleryHeight = galleryRef.current?.offsetHeight || 0;
-			const totalContentHeight = headerHeight + galleryHeight + 120;
+			rafId = window.requestAnimationFrame(() => {
+				const nextWidth = window.innerWidth;
+				const nextHeight = window.innerHeight;
 
-			const availableHeight = window.innerHeight - 96;
-			const fits = window.innerHeight >= 720 && totalContentHeight < availableHeight;
-			setIsFullSectionSticky(fits);
+				setWindowWidth((prev) => (prev !== nextWidth ? nextWidth : prev));
+				setWindowHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
 
-			if (!fits) {
-				const calculatedTop = Math.max(82, Math.min(118, (window.innerHeight - galleryHeight) / 2));
-				setGalleryStickyTop(calculatedTop);
-			} else {
-				setGalleryStickyTop(null);
-			}
+				let currentContainerWidth = 1240;
+				if (galleryRef.current) {
+					currentContainerWidth = galleryRef.current.offsetWidth;
+					setContainerWidth((prev) => (prev !== currentContainerWidth ? currentContainerWidth : prev));
+				}
+
+				// Determine if the whole section fits within the viewport height minus the fixed nav.
+				const currentHeaderHeight = headerRef.current?.offsetHeight || 0;
+				const galleryHeight = galleryRef.current?.offsetHeight || 0;
+				const totalContentHeight = currentHeaderHeight + galleryHeight + 120;
+
+				setHeaderHeight((prev) => (prev !== currentHeaderHeight ? currentHeaderHeight : prev));
+
+				const availableHeight = nextHeight - 96;
+				const fits = nextHeight >= 720 && totalContentHeight < availableHeight;
+				setIsFullSectionSticky((prev) => (prev !== fits ? fits : prev));
+
+				if (!fits) {
+					const calculatedTop = Math.max(82, Math.min(118, (nextHeight - galleryHeight) / 2));
+					setGalleryStickyTop((prev) => (prev !== calculatedTop ? calculatedTop : prev));
+				} else {
+					setGalleryStickyTop((prev) => (prev !== null ? null : prev));
+				}
+			});
 		};
 
 		updateDimensions();
@@ -58,6 +71,7 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 		if (headerRef.current) resizeObserver.observe(headerRef.current);
 		if (galleryRef.current) resizeObserver.observe(galleryRef.current);
 		return () => {
+			if (rafId) window.cancelAnimationFrame(rafId);
 			window.removeEventListener('resize', updateDimensions);
 			resizeObserver.disconnect();
 		};
@@ -90,11 +104,22 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 	const trackWidth = phases.length * cardWidth + Math.max(0, phases.length - 1) * GAP;
 	const totalDistance = Math.max(0, trackWidth - containerWidth);
 	const scrollTrackHeight = Math.max(windowHeight + totalDistance, windowHeight * 2);
-	const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance]);
 
-	// Update active index based on scroll position
+	// Calculate the start progress percentage so horizontal scroll only starts when the section becomes sticky
+	let startProgress = 0;
+	if (!isFullSectionSticky) {
+		const stickyTopValue = galleryStickyTop !== null ? galleryStickyTop : 100;
+		const scrollBeforeSticky = Math.max(0, 80 + headerHeight - stickyTopValue);
+		const totalScrollableDistance = scrollTrackHeight + 220 - windowHeight;
+		startProgress = totalScrollableDistance > 0 ? Math.min(0.9, scrollBeforeSticky / totalScrollableDistance) : 0;
+	}
+
+	const x = useTransform(scrollYProgress, [startProgress, 1], [0, -totalDistance]);
+
+	// Update active index based on scroll position (relative to the active progress range)
 	useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-		const idx = Math.min(Math.round(latest * (phases.length - 1)), phases.length - 1);
+		const activeProgress = latest < startProgress ? 0 : (latest - startProgress) / (1 - startProgress);
+		const idx = Math.min(Math.round(activeProgress * (phases.length - 1)), phases.length - 1);
 		setActiveIndex(idx);
 	});
 
@@ -107,11 +132,12 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 	// The sliding marker starting position inside the track matches Card 1's center circle (X = cardWidth / 2)
 	const leftStart = cardWidth / 2;
 	const maxMarkerDistance = containerWidth - cardWidth;
-	const activeProgressWidth = useTransform(scrollYProgress, [0, 1], [leftStart, leftStart + maxMarkerDistance]);
+	const activeProgressWidth = useTransform(scrollYProgress, [startProgress, 1], [leftStart, leftStart + maxMarkerDistance]);
 
 	// Dynamic linear-gradient peaking at the active marker's percentage position along the track
 	const progressGradient = useTransform(scrollYProgress, (latest) => {
-		const markerPos = leftStart + latest * maxMarkerDistance;
+		const activeProgress = latest < startProgress ? 0 : (latest - startProgress) / (1 - startProgress);
+		const markerPos = leftStart + activeProgress * maxMarkerDistance;
 		const percent = totalLineWidth > 0 ? (markerPos / totalLineWidth) * 100 : 0;
 		return `linear-gradient(90deg, rgba(199, 147, 61, 0) 0%, #C7933D ${percent}%, rgba(199, 147, 61, 0) 100%)`;
 	});
@@ -126,9 +152,9 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 		<AnimatedFadeUp delay={0.1} className='w-full flex flex-col gap-7 overflow-visible'>
 			{/* Thick 7px Progress Line Container - static position aligned with card centers */}
 			<div
-				className='relative z-0 pointer-events-none h-[7px] shrink-0'
+				className='relative z-0 pointer-events-none overflow-visible h-[7px] shrink-0'
 				style={{
-					width: `${totalLineWidth}px`,
+					width: isDesktop || isTablet ? `${totalLineWidth}px` : '100%',
 				}}>
 				{/* Track with dynamic gradient focused on marker */}
 				<motion.div
@@ -140,7 +166,7 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 
 				{/* Sliding Gold Indicator Marker */}
 				<motion.div
-					className='absolute w-[22px] h-[22px] rounded-full border-[3px] border-brand-gold bg-[#060d15] flex items-center justify-center -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_12px_rgba(199,147,61,0.6)]'
+					className='absolute w-[22px] h-[22px] rounded-full border-[3px] border-brand-gold bg-background flex items-center justify-center -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_12px_rgba(199,147,61,0.6)]'
 					style={{
 						top: '3.5px',
 						left: activeProgressWidth,
@@ -151,8 +177,11 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 
 			{/* Scrollable Gallery container */}
 			{phases && phases.length > 0 && (
-				<div ref={galleryRef} className='w-full relative overflow-visible'>
-					<motion.div data-process-track style={{ x, gap: `${GAP}px` }} className='h-full relative flex flex-row'>
+				<div ref={galleryRef} className='w-full relative overflow-hidden md:overflow-visible'>
+					<motion.div
+						data-process-track
+						style={{ x, gap: `${GAP}px`, width: `${trackWidth}px` }}
+						className='h-full relative flex flex-row shrink-0 w-max min-w-max'>
 						{phases.map((phase, i) => {
 							const { title, badge, description, icon } = phase;
 							const isActive = activeIndex === i;
@@ -239,7 +268,7 @@ export default function PhaseDominatingProcessSection(props: PhaseDominatingProc
 	if (isFullSectionSticky) {
 		return (
 			<div ref={containerRef} data-process-section className='relative bg-background w-full' style={{ height: `${scrollTrackHeight}px` }}>
-				<div data-process-full-sticky className='sticky top-0 h-screen w-full flex flex-col justify-center overflow-hidden z-10 py-12'>
+				<div data-process-full-sticky className='sticky top-0 h-dvh w-full flex flex-col justify-center overflow-hidden z-10 py-12'>
 					<div className='w-full'>
 						{headerContent}
 						<SectionContainer className='relative w-full flex flex-col justify-center space-y-7 overflow-visible'>
