@@ -43,12 +43,12 @@ export default function GraphSection(props?: Partial<GraphSectionData>) {
 
 			{/* Sticky Scroll Container for the Graph */}
 			<div ref={sectionRef} className='relative h-[250vh] pb-36'>
-				<div className='sticky top-[80px] z-10 h-[calc(100vh-80px)] overflow-hidden flex flex-col justify-center py-0'>
+				<div className='sticky top-[80px] z-10 h-[calc(100dvh-80px)] overflow-hidden flex flex-col justify-center py-0'>
 					<SectionContainer className='relative z-10 w-full'>
 						{/* Graph Container */}
 						<div
 							ref={graphContainerRef}
-							className=' [--text-headroom:48px] lg:[--text-headroom:116px] flex h-[50vh] sm:h-[60vh] lg:h-[70vh] xl:h-[75vh] max-h-[calc(100vh-140px)] w-full items-end justify-between rounded-xl pb-0'>
+							className=' [--text-headroom:48px] lg:[--text-headroom:116px] flex h-[50dvh] sm:h-[60dvh] lg:h-[70dvh] xl:h-[75dvh] max-h-[calc(100dvh-140px)] w-full items-end justify-between rounded-xl pb-0'>
 							<div className='flex items-end justify-between gap-4 md:gap-6 lg:gap-[87.59px] w-full h-full border-b-4 border-white/10 pb-4'>
 								{stages &&
 									stages.map((stage, index) => {

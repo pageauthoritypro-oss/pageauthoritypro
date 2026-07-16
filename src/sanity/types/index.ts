@@ -98,6 +98,7 @@ export interface SiteSettings {
 	footerTagline?: string;
 	footerCta?: CtaBtn[];
 	footerNavigation?: NavigationItem[];
+	footerMapEmbed?: string;
 	footerCopyright?: string;
 	footerCredits?: string;
 	footerDescription?: string;

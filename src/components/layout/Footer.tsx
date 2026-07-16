@@ -3,6 +3,7 @@ import Link from 'next/link';
 import CtaLink from '@/components/CtaLink';
 import DynamicIcon from '@/components/DynamicIcon';
 import SectionContainer from '@/components/layout/SectionContainer';
+import FooterMap from '@/components/layout/FooterMap';
 import type { SiteSettings } from '@/sanity/types';
 
 const USER_LINK_REGEX =
@@ -49,11 +50,12 @@ export default function Footer({ settings }: { settings?: SiteSettings | null })
 	const footerLogo = settings.footerLogo;
 	const socialMedia = settings.socialMedia ?? [];
 	const footerNavigation = settings?.footerNavigation ?? [];
+	const footerMapEmbed = settings.footerMapEmbed;
 
 	return (
 		<footer className='w-full bg-[#020508]'>
 			<SectionContainer className='pt-20 pb-0'>
-				<div className='flex flex-col text-center sm:text-left lg:flex-row lg:justify-between gap-12 lg:gap-0 pb-16 lg:pb-[300px]'>
+				<div className='flex flex-col text-center sm:text-left lg:flex-row lg:justify-between gap-12 lg:gap-16 pb-16 lg:pb-24'>
 					<div className='flex flex-col items-center sm:items-start gap-8 lg:w-[304px] lg:shrink-0'>
 						<div className='flex flex-col items-center sm:items-start gap-8'>
 							<Link href='/' aria-label='Page Authority Pro — Home' className='w-fit'>
@@ -81,80 +83,87 @@ export default function Footer({ settings }: { settings?: SiteSettings | null })
 
 						{socialMedia.length > 0 && (
 							<div className='flex items-center justify-center sm:justify-start gap-3'>
-								{socialMedia.map((social) => (
-									<Link
-										key={social.platform}
-										href={social.url}
-										target='_blank'
-										rel='noopener noreferrer'
-										aria-label={social.platform}
-										className='flex items-center justify-center w-9 h-9 rounded-full bg-white/10 text-white/90 hover:text-brand-gold hover:bg-white/15 transition-colors'>
-										<DynamicIcon icon={social.platform} size={16} />
-									</Link>
-								))}
+								{socialMedia.map((social, i) => {
+									const secureUrl = social.url?.replace(/^http:\/\//i, 'https://') ?? '';
+									return (
+										<a
+											key={i}
+											href={secureUrl}
+											target='_blank'
+											rel='noopener noreferrer'
+											aria-label={social.platform}
+											className='flex items-center justify-center w-9 h-9 rounded-full bg-white/10 text-white/90 hover:text-brand-gold hover:bg-white/15 transition-colors'>
+											<DynamicIcon icon={social.platform} size={16} />
+										</a>
+									);
+								})}
 							</div>
 						)}
 					</div>
 
-					<nav
-						aria-label='Footer'
-						className='w-full flex flex-col items-center text-center px-8 sm:px-0 sm:grid sm:grid-cols-3 sm:items-start sm:text-left gap-x-12 gap-y-14 lg:contents'>
-						{footerNavigation.map((col, i) => {
-							const formattedColUrl = formatLink(col.url);
-							const links = col?.children || [];
-							return (
-								<div key={i} className='w-fit sm:w-auto flex flex-col items-center sm:items-start gap-5'>
-									{formattedColUrl ? (
-										<Link
-											href={formattedColUrl}
-											target={col.openInNewTab ? '_blank' : '_self'}
-											rel={col.openInNewTab ? 'noopener noreferrer' : undefined}
-											className='font-heading font-medium text-[12px] uppercase tracking-widest leading-none text-white/60 hover:text-white transition-colors block'>
-											{col.label}
-										</Link>
-									) : (
-										<p className='font-heading font-medium text-[12px] uppercase tracking-widest leading-none text-white/60'>
-											{col.label}
-										</p>
-									)}
-									<ul className='flex flex-col items-center sm:items-start gap-3'>
-										{links.map((link, idx) => {
-											const formattedHref = formatLink(link.url);
-											const isFlex = !!link.logo;
-											const baseClass = isFlex
-												? 'flex items-center gap-2.5 font-heading text-base text-white/80 leading-[1.4] tracking-[-0.01em]'
-												: 'font-heading text-base text-white/80 leading-[1.4] tracking-[-0.01em]';
+					<div className='flex w-full flex-col items-center gap-14 lg:flex-1 lg:items-stretch'>
+						<nav
+							aria-label='Footer'
+							className='w-full flex flex-col items-center text-center px-8 sm:px-0 sm:grid sm:grid-cols-3 sm:items-start sm:text-left gap-x-12 gap-y-14 lg:flex lg:flex-row lg:justify-between'>
+							{footerNavigation.map((col, i) => {
+								const formattedColUrl = formatLink(col.url);
+								const links = col?.children || [];
+								return (
+									<div key={i} className='w-fit sm:w-auto flex-1 flex flex-col items-center sm:items-start gap-5'>
+										{formattedColUrl ? (
+											<Link
+												href={formattedColUrl}
+												target={col.openInNewTab ? '_blank' : '_self'}
+												rel={col.openInNewTab ? 'noopener noreferrer' : undefined}
+												className='font-heading font-medium text-[12px] uppercase tracking-widest leading-none text-white/60 hover:text-white transition-colors block'>
+												{col.label}
+											</Link>
+										) : (
+											<p className='font-heading font-medium text-[12px] uppercase tracking-widest leading-none text-white/60'>
+												{col.label}
+											</p>
+										)}
+										<ul className='flex flex-col items-center sm:items-start gap-3'>
+											{links.map((link, idx) => {
+												const formattedHref = formatLink(link.url);
+												const isFlex = !!link.logo;
+												const baseClass = isFlex
+													? 'flex items-center gap-2.5 font-heading text-base text-white/80 leading-[1.4] tracking-[-0.01em]'
+													: 'font-heading text-base text-white/80 leading-[1.4] tracking-[-0.01em]';
 
-											const content = (
-												<>
-													{link.logo && (
-														<span className='flex items-center justify-center w-6 h-6 rounded-full shrink-0 bg-[#211F1B] text-white transition-colors group-hover:bg-[#312E29]'>
-															<DynamicIcon icon={link.logo} size={14} />
-														</span>
-													)}
-													<span>{link.label}</span>
-												</>
-											);
+												const content = (
+													<>
+														{link.logo && (
+															<span className='flex items-center justify-center w-6 h-6 rounded-full shrink-0 bg-[#211F1B] text-white transition-colors group-hover:bg-[#312E29]'>
+																<DynamicIcon icon={link.logo} size={14} />
+															</span>
+														)}
+														<span>{link.label}</span>
+													</>
+												);
 
-											return (
-												<li key={`${link.url}-${idx}`}>
-													{formattedHref ? (
-														<Link
-															href={formattedHref}
-															className={`${baseClass} hover:text-white transition-colors group`}>
-															{content}
-														</Link>
-													) : (
-														<div className={baseClass}>{content}</div>
-													)}
-												</li>
-											);
-										})}
-									</ul>
-								</div>
-							);
-						})}
-					</nav>
+												return (
+													<li key={`${link.url}-${idx}`}>
+														{formattedHref ? (
+															<Link
+																href={formattedHref}
+																className={`${baseClass} hover:text-white transition-colors group`}>
+																{content}
+															</Link>
+														) : (
+															<div className={baseClass}>{content}</div>
+														)}
+													</li>
+												);
+											})}
+										</ul>
+									</div>
+								);
+							})}
+						</nav>
+
+						<FooterMap embed={footerMapEmbed} />
+					</div>
 				</div>
 
 				{(copyright || bottomDescription) && (

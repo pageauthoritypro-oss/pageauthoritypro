@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { contactFormSchema } from "@/lib/validations/contact";
+import { contactFormSchema, formatPhoneNumber } from "@/lib/validations/contact";
 import { getPrisma } from "@/lib/prisma";
 
+const TURNSTILE_TIMEOUT_MS = 8000;
+
 async function verifyTurnstile(token: string, secretKey: string) {
-  const response = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ secret: secretKey, response: token }),
-    },
-  );
-  const data = (await response.json()) as { success: boolean };
-  return data.success;
+  try {
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret: secretKey, response: token }),
+        signal: AbortSignal.timeout(TURNSTILE_TIMEOUT_MS),
+      },
+    );
+    const data: unknown = await response.json();
+    return typeof data === "object" && data !== null && "success" in data
+      ? Boolean((data as { success: unknown }).success)
+      : false;
+  } catch (error) {
+    console.error("Turnstile verification request failed:", error);
+    return false;
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -28,21 +38,31 @@ export async function POST(request: NextRequest) {
 
   const { hp_check, turnstileToken, ...fieldValues } = parsed.data;
 
+  if (fieldValues.phone) {
+    fieldValues.phone = formatPhoneNumber(fieldValues.phone);
+  }
+
   if (hp_check) {
     return NextResponse.json({ success: true });
   }
 
   const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-  if (turnstileSecret) {
-    if (
-      !turnstileToken ||
-      !(await verifyTurnstile(turnstileToken, turnstileSecret))
-    ) {
-      return NextResponse.json(
-        { error: "Verification failed. Please try again." },
-        { status: 400 },
-      );
-    }
+  if (!turnstileSecret) {
+    console.error("TURNSTILE_SECRET_KEY is not configured — rejecting submission.");
+    return NextResponse.json(
+      { error: "Something went wrong. Please try again later." },
+      { status: 500 },
+    );
+  }
+
+  if (
+    !turnstileToken ||
+    !(await verifyTurnstile(turnstileToken, turnstileSecret))
+  ) {
+    return NextResponse.json(
+      { error: "Verification failed. Please try again." },
+      { status: 400 },
+    );
   }
 
   const fields = Object.entries(fieldValues).map(([name, value]) => ({

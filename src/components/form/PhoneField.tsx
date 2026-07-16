@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import type { FieldPath } from 'react-hook-form';
@@ -11,6 +12,14 @@ interface PhoneFieldProps {
 }
 
 export default function PhoneField({ name, label, placeholder }: PhoneFieldProps) {
+	// The widget fires onChange once on mount with just "+<dialCode>" (nothing
+	// typed yet). That very first call must be swallowed entirely — not even
+	// forwarded as an empty string — otherwise it still counts as a "change"
+	// and can retrigger validation right after a post-submit reset/remount.
+	// Any later dial-code-only value (the user backspacing everything) should
+	// still propagate as empty.
+	const isInitialPrefillRef = useRef(true);
+
 	return (
 		<FormField
 			name={name}
@@ -21,7 +30,24 @@ export default function PhoneField({ name, label, placeholder }: PhoneFieldProps
 						defaultCountry='us'
 						name={fieldName}
 						value={value}
-						onChange={(next) => onChange(next ?? '')}
+						onChange={(next, meta) => {
+							const dialCode = meta?.country?.dialCode;
+							const isDialCodeOnly = dialCode ? next === `+${dialCode}` : false;
+							const nextValue = isDialCodeOnly ? '' : (next ?? '');
+
+							// Prevent programmatic resets (e.g. from RHF reset())
+							// from triggering unnecessary change events back to RHF.
+							if (nextValue === value) {
+								return;
+							}
+
+							if (isDialCodeOnly && isInitialPrefillRef.current) {
+								isInitialPrefillRef.current = false;
+								return;
+							}
+							isInitialPrefillRef.current = false;
+							onChange(nextValue);
+						}}
 						onBlur={onBlur}
 						placeholder={placeholder}
 						className='h-[54px] w-full'

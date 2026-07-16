@@ -99,7 +99,7 @@ export default async function RootLayout({
 	const page = bypassMaintenance ? children : <MaintenanceMode>{children}</MaintenanceMode>;
 
 	return (
-		<html lang='en' className={`${satoshi.variable} h-full antialiased`}>
+		<html lang='en' className={`${satoshi.variable} h-full antialiased`} suppressHydrationWarning>
 			<head>
 				{!isStudioRoute && googleTagManagerId && (
 					<Script id='gtm-script' strategy='afterInteractive'>

@@ -26,17 +26,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogDetailPage({ params }: Props) {
 	const { slug } = await params;
-	const [post, page] = await Promise.all([
-		getBlogBySlug(slug),
-		getPage('blog-details'),
-	]);
+	const [post, page] = await Promise.all([getBlogBySlug(slug), getPage('blog-details')]);
 
 	if (!post) notFound();
 
 	const sanityCtaSection = page?.sections?.find((s) => s._type === 'ctaSection') as CtaSectionData | undefined;
 
 	return (
-		<main id='main-content'>
+		<main id='main-content max-w-screen overflow-x-hidden'>
 			{post.seo?.schemaMarkup && renderJsonLd(post.seo.schemaMarkup)}
 			<AnimatedSection isHero isLcp>
 				<BlogDetailSection post={post} />
