@@ -18,13 +18,22 @@ interface Props {
   logo?: { url?: string; iconSvg?: string; alt?: string } | null;
 }
 
+// Above this many links, the desktop nav truncates and offers a "More" drawer
+// instead of overflowing past the logo/CTA — CMS content can add arbitrarily many.
+const MAX_VISIBLE_LINKS = 5;
+
 export default function NavbarClient({ links, ctas, logo }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const pathname = usePathname();
+
+  const visibleLinks = links.slice(0, MAX_VISIBLE_LINKS);
+  const overflowLinks = links.slice(MAX_VISIBLE_LINKS);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setSheetOpen(false);
+			setMoreOpen(false);
 		}, 0);
 		return () => clearTimeout(timer);
 	}, [pathname]);
@@ -42,8 +51,9 @@ export default function NavbarClient({ links, ctas, logo }: Props) {
 
 				{/* Desktop links */}
 				{links.length > 0 && (
-					<ul className='hidden md:flex items-center gap-8 list-none' role='list'>
-						{links.map(({ label, href, openInNewTab, children }, i) => (
+					<div className='hidden min-w-0 items-center gap-8 md:flex'>
+					<ul className='flex items-center gap-8 list-none' role='list'>
+						{visibleLinks.map(({ label, href, openInNewTab, children }, i) => (
 							<li key={i} className={cn(children?.length && 'group relative')}>
 								<Link
 									href={href}
@@ -90,6 +100,55 @@ export default function NavbarClient({ links, ctas, logo }: Props) {
 							</li>
 						))}
 					</ul>
+
+					{overflowLinks.length > 0 && (
+						<Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+							<SheetTrigger
+								title='Show more links'
+								aria-label='Show more navigation links'
+								className='flex shrink-0 items-center gap-1 text-sm font-medium text-text-muted transition-colors hover:text-white'>
+								More
+								<svg width='12' height='12' viewBox='0 0 12 12' fill='none' aria-hidden='true'>
+									<path d='M2 4l4 4 4-4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
+								</svg>
+							</SheetTrigger>
+
+							<SheetContent
+								side='right'
+								className='flex w-72 flex-col border-white/8 bg-hero-bg px-6 py-8'
+								onClick={(e) => { if ((e.target as Element).closest('a')) setMoreOpen(false); }}>
+								<ul className='flex flex-col gap-0.5 list-none' role='list'>
+									{overflowLinks.map(({ label, href, openInNewTab, children }, i) => (
+										<li key={i}>
+											<Link
+												href={href}
+												target={openInNewTab ? '_blank' : undefined}
+												rel={openInNewTab ? 'noopener noreferrer' : undefined}
+												className='block rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/5 hover:text-white'>
+												{label}
+											</Link>
+											{children?.length && (
+												<ul className='mb-1 ml-3 flex flex-col gap-0.5 list-none border-l border-white/8 pl-3'>
+													{children.map((child, j) => (
+														<li key={j}>
+															<Link
+																href={child.href}
+																target={child.openInNewTab ? '_blank' : undefined}
+																rel={child.openInNewTab ? 'noopener noreferrer' : undefined}
+																className='block rounded-md px-3 py-2 text-sm text-white/50 transition-colors hover:bg-white/5 hover:text-white/80'>
+																{child.label}
+															</Link>
+														</li>
+													))}
+												</ul>
+											)}
+										</li>
+									))}
+								</ul>
+							</SheetContent>
+						</Sheet>
+					)}
+					</div>
 				)}
 
 				{/* Desktop CTAs */}

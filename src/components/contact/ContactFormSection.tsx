@@ -110,13 +110,13 @@ export default function ContactFormSection({ data }: Props) {
 					</div>
 
 					{contactInfo && contactInfo.length > 0 && (
-						<div className='flex flex-row gap-6 lg:flex-col'>
+						<div className='flex flex-col gap-6 min-[520px]:flex-row lg:flex-col'>
 							{contactInfo.map((item, index) => {
 								const href = item.value.includes('@') ? `mailto:${item.value}` : `tel:${item.value.replace(/\s+/g, '')}`;
 								return (
 									<div
 										key={item._key ?? index}
-										className='flex items-center gap-3.5 border-r border-[#B4BAC2]/17 pr-6 last:border-r-0 lg:border-r-0 lg:border-b lg:pr-0 lg:pb-6 lg:last:border-b-0 lg:last:pb-0'>
+										className='flex items-center gap-3.5 border-b border-[#B4BAC2]/17 pb-6 last:border-b-0 min-[520px]:border-r min-[520px]:border-b-0 min-[520px]:pr-6 min-[520px]:pb-0 min-[520px]:last:border-r-0 lg:border-r-0 lg:border-b lg:pr-0 lg:pb-6 lg:last:border-b-0 lg:last:pb-0'>
 										<span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-brand-gold/7 bg-brand-gold/8'>
 											<DynamicIcon icon={item.icon} size={17} className='text-brand-gold' />
 										</span>
