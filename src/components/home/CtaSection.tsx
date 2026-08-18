@@ -14,32 +14,6 @@ export default function CtaSection(props: CtaSectionData) {
 
 	return (
 		<section className='px-5 lg:px-0 relative overflow-hidden bg-background py-20 lg:py-32 xl:py-36 flex flex-col items-center justify-center z-10 w-full min-h-[600px]'>
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute left-0 bottom-0 top-0 w-[120px] sm:w-[220px] md:w-[280px] lg:w-[320px] xl:w-[360px] select-none z-0 translate-x-[-42%]'>
-				<div className='relative w-full h-full'>
-					<Image
-						src='/assets/column.webp'
-						alt=''
-						fill
-						className='aspect-auto object-contain object-center opacity-16'
-						sizes='(max-width: 768px) 120px, 360px'
-					/>
-				</div>
-			</div>
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute right-0 bottom-0 top-0 w-[120px] sm:w-[220px] md:w-[280px] lg:w-[320px] xl:w-[360px] select-none z-0 translate-x-[42%]'>
-				<div className='relative w-full h-full'>
-					<Image
-						src='/assets/column.webp'
-						alt=''
-						fill
-						className='aspect-auto object-contain object-center opacity-16'
-						sizes='(max-width: 768px) 120px, 360px'
-					/>
-				</div>
-			</div>
 			{bgImage && (
 				<div
 					aria-hidden='true'
