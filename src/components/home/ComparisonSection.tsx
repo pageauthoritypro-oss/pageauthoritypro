@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import CtaLink from '@/components/CtaLink';
 import type { ComparisonSectionData } from '@/sanity/types/index';
@@ -40,36 +39,6 @@ export default function ComparisonSection(props: ComparisonSectionData) {
 
 	return (
 		<section aria-labelledby='comparison-heading' className='relative overflow-hidden bg-background py-16 lg:py-24 2xl:py-28'>
-			{/* Decorative Left Pillar */}
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute h-full md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 xl:translate-x-[-44.5%] -translate-y-20 flex items-start md:items-end justify-center pb-12'>
-				<Image
-					src='/assets/column.webp'
-					alt=''
-					width={282}
-					height={770}
-					className='w-full h-[444px] sm:h-[550px] md:h-[88%] lg:h-[85%] aspect-auto opacity-16'
-					loading='lazy'
-				/>
-				<div className='absolute w-full h-[444px] sm:h-[550px] md:h-5/6 bg-[linear-gradient(to_bottom,rgba(6,13,21,0)_17%,rgba(6,13,21,0.71)_59%,rgba(6,13,21,1)_96%)]'></div>
-			</div>
-
-			{/* Decorative Right Pillar */}
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute h-full md:top-1/2 right-0 translate-x-1/2 md:-translate-y-1/2 xl:translate-x-[44.5%] -translate-y-20 flex items-start md:items-end justify-center pb-12'>
-				<Image
-					src='/assets/column.webp'
-					alt=''
-					width={282}
-					height={770}
-					className='w-full h-[444px] sm:h-[550px] md:h-[88%] lg:h-[84%] aspect-auto opacity-16'
-					loading='lazy'
-				/>
-				<div className='absolute w-full h-[444px] sm:h-[550px] md:h-5/6 bg-[linear-gradient(to_bottom,rgba(6,13,21,0)_17%,rgba(6,13,21,0.71)_59%,rgba(6,13,21,1)_96%)]'></div>
-			</div>
-
 			<div className='flex flex-col gap-10 md:gap-[72px]'>
 				{/* Section Header */}
 				<SectionHeader
